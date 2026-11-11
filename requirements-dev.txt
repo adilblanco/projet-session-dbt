@@ -1,0 +1,5 @@
+# Outils d'exploration (notebooks), en plus de requirements.txt
+pandas
+ipykernel
+matplotlib
+jupyterlab
