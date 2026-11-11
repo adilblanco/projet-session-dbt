@@ -11,18 +11,18 @@ brésilien en un modèle prêt pour l'analyse de la satisfaction client.
 
 Les données traversent quatre couches, chacune avec un rôle précis.
 
-**Staging** : nettoyer chaque source, une par une.
+**Staging** (couche d'intégration / pré-traitement) : nettoyer chaque source, une par une.
 On renomme les colonnes, on convertit les types et on fait des calculs simples.
-Pas de jointure, et le grain de la source est conservé.
+Pas de jointure, et la granularité de la source est conservée.
 
 **Intermediate** : appliquer les règles métier.
 On combine et on transforme les données pour préparer les marts.
 Ces modèles ne sont pas destinés aux utilisateurs finaux.
 
-**Marts** : le modèle dimensionnel (faits et dimensions).
+**Marts** (datamart) : le modèle dimensionnel, en schéma étoile (faits et dimensions).
 C'est ce que les analystes interrogent.
 
-**Semantic** : les métriques métier, définies une seule fois.
+**Semantic** (couche sémantique) : les indicateurs métier, définis une seule fois.
 Tout le monde calcule le même indicateur de la même façon.
 
 Les choix de modélisation et leur justification sont détaillés dans `../docs/choix_de_modelisation.md`.
