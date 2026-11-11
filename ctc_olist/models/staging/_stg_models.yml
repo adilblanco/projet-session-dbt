@@ -208,3 +208,47 @@ models:
         description: Vrai si le client a écrit un commentaire (comment_message non null).
         data_tests:
           - not_null
+
+  - name: stg_products
+    description: >
+      Produits nettoyés : une ligne par produit.
+      Colonnes mal orthographiées à la source (« lenght ») corrigées.
+    columns:
+      - name: product_id
+        description: Identifiant unique du produit.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_category_name
+        description: >
+          Catégorie du produit en portugais (clé de jointure avec la table de traduction).
+          Null pour 610 produits.
+
+      - name: name_length
+        description: Nombre de caractères du nom du produit.
+
+      - name: description_length
+        description: Nombre de caractères de la description du produit.
+
+      - name: photos_count
+        description: Nombre de photos publiées pour le produit.
+
+      - name: weight_g
+        description: Poids du produit, en grammes.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+
+      - name: length_cm
+        description: Longueur du colis, en centimètres.
+
+      - name: height_cm
+        description: Hauteur du colis, en centimètres.
+
+      - name: width_cm
+        description: Largeur du colis, en centimètres.
+
+      - name: volume_cm3
+        description: Volume du colis (longueur × hauteur × largeur), en centimètres cubes.
