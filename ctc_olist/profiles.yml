@@ -1,0 +1,15 @@
+# Connexions du projet. Le jeton MotherDuck est lu dans la variable MOTHERDUCK_TOKEN.
+ctc_olist:
+  target: motherduck
+  outputs:
+    # Base cloud MotherDuck
+    motherduck:
+      type: duckdb
+      path: "md:ctc_olist"
+      threads: 4
+
+    # Secours : fichier DuckDB local
+    local:
+      type: duckdb
+      path: "ctc_olist.duckdb"
+      threads: 4
