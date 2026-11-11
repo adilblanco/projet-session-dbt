@@ -94,6 +94,22 @@ Montants (articles, frais de port, total), nombre d'articles, délai de livraiso
 *Preuve :* même chiffre d'affaires aux deux grains : 15 843 553 BRL.
 
 
+## Couche sémantique
+
+**Métriques définies une seule fois**
+*Choix :* modèle sémantique `orders` sur `fct_orders` et 5 métriques clés (chiffre d'affaires, panier moyen, taux de retard, note moyenne, taux de commentaires négatifs).
+*Notion :* couche sémantique ; source unique de vérité pour les indicateurs.
+*Preuve :* `mf validate-configs` sans erreur ; `mf query` regroupe les métriques par jour, mois, trimestre ou année.
+
+**Métriques ratio construites sur des métriques simples**
+*Choix :* `late_delivery_rate` = commandes en retard ÷ commandes livrées (et non ÷ toutes les commandes).
+*Notion :* bien choisir le dénominateur ; une commande non livrée ne peut pas être en retard.
+
+**Calendrier réutilisé**
+*Choix :* `metricflow_time_spine` reprend `dim_date` sans la ligne « Unknown ».
+*Notion :* ne pas dupliquer la logique ; une seule définition du calendrier.
+
+
 ## Tests
 
 | Test | Ce qu'il prouve |

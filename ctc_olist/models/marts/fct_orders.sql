@@ -46,6 +46,9 @@ final as (
         {{ dbt_utils.generate_surrogate_key(['orders.estimated_delivery_date']) }}          as estimated_delivery_date_sk,
         {{ dbt_utils.generate_surrogate_key(['cast(orders.delivered_to_customer_at as date)']) }} as delivered_date_sk,
 
+        -- date d'achat en clair : axe temporel de la couche sémantique (MetricFlow)
+        cast(orders.purchased_at as date) as purchase_date,
+
         -- mesures : montants (BRL) ; commande sans article -> 0
         coalesce(order_items.items_count, 0)     as items_count,
         coalesce(order_items.items_amount, 0)    as items_amount,

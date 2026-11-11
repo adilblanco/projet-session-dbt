@@ -1,0 +1,152 @@
+version: 2
+
+models:
+  - name: metricflow_time_spine
+    description: >
+      Calendrier de référence de MetricFlow : une ligne par jour, de 2016 à 2018.
+      Sert à regrouper les métriques par jour, mois, trimestre ou année (metric_time).
+    # Déclare ce modèle comme calendrier de MetricFlow
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: Le jour.
+        granularity: day
+        data_tests:
+          - unique
+          - not_null
+
+semantic_models:
+  - name: orders
+    description: Commandes (fct_orders) exposées à MetricFlow ; une ligne par commande.
+    model: ref('fct_orders')
+    defaults:
+      agg_time_dimension: purchase_date
+
+    # Clés : permettent à MetricFlow de relier les modèles sémantiques entre eux
+    entities:
+      - name: order
+        type: primary
+        expr: order_id
+      - name: customer
+        type: foreign
+        expr: customer_sk
+
+    # Axes d'analyse
+    dimensions:
+      - name: purchase_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: order_status
+        type: categorical
+      - name: sentiment_label
+        type: categorical
+
+    # Agrégations de base, réutilisées par les métriques
+    measures:
+      - name: order_count
+        description: Nombre de commandes.
+        agg: count
+        expr: order_id
+      - name: order_amount
+        description: Somme des montants des commandes, en BRL.
+        agg: sum
+      - name: delivered_order_count
+        description: Nombre de commandes livrées.
+        agg: count
+        expr: delivery_days
+      - name: late_order_count
+        description: Nombre de commandes livrées en retard.
+        agg: sum
+        expr: case when is_late then 1 else 0 end
+      - name: review_score_avg
+        description: Note moyenne des avis (1 à 5).
+        agg: average
+        expr: review_score
+      - name: commented_order_count
+        description: Nombre de commandes dont l'avis contient un commentaire.
+        agg: count
+        expr: sentiment_label
+      - name: negative_order_count
+        description: Nombre de commandes au commentaire négatif.
+        agg: sum
+        expr: case when sentiment_label = 'negative' then 1 else 0 end
+
+# Métriques : définies une seule fois, interrogeables avec `mf query`
+# Une métrique « ratio » se calcule à partir d'autres métriques : on définit d'abord les comptes simples.
+metrics:
+  # --- métriques simples (une mesure) ---
+  - name: total_revenue
+    label: Chiffre d'affaires
+    description: Somme des montants des commandes (articles + frais de port), en BRL.
+    type: simple
+    type_params:
+      measure: order_amount
+
+  - name: order_count
+    label: Nombre de commandes
+    description: Nombre de commandes passées.
+    type: simple
+    type_params:
+      measure: order_count
+
+  - name: delivered_order_count
+    label: Commandes livrées
+    description: Nombre de commandes livrées au client.
+    type: simple
+    type_params:
+      measure: delivered_order_count
+
+  - name: late_order_count
+    label: Commandes en retard
+    description: Nombre de commandes livrées après la date estimée.
+    type: simple
+    type_params:
+      measure: late_order_count
+
+  - name: commented_order_count
+    label: Commandes commentées
+    description: Nombre de commandes dont l'avis contient un commentaire.
+    type: simple
+    type_params:
+      measure: commented_order_count
+
+  - name: negative_order_count
+    label: Commentaires négatifs
+    description: Nombre de commandes au commentaire négatif.
+    type: simple
+    type_params:
+      measure: negative_order_count
+
+  - name: average_review_score
+    label: Note moyenne
+    description: Note moyenne des avis clients (1 à 5).
+    type: simple
+    type_params:
+      measure: review_score_avg
+
+  # --- métriques ratio (une métrique divisée par une autre) ---
+  - name: average_order_value
+    label: Panier moyen
+    description: Montant moyen d'une commande, en BRL.
+    type: ratio
+    type_params:
+      numerator: total_revenue
+      denominator: order_count
+
+  - name: late_delivery_rate
+    label: Taux de livraison en retard
+    description: Part des commandes livrées après la date estimée (sur les commandes livrées).
+    type: ratio
+    type_params:
+      numerator: late_order_count
+      denominator: delivered_order_count
+
+  - name: negative_sentiment_rate
+    label: Taux de commentaires négatifs
+    description: Part des commentaires au sentiment négatif (sur les commandes commentées).
+    type: ratio
+    type_params:
+      numerator: negative_order_count
+      denominator: commented_order_count
