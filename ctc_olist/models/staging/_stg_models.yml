@@ -252,3 +252,25 @@ models:
 
       - name: volume_cm3
         description: Volume du colis (longueur × hauteur × largeur), en centimètres cubes.
+
+  - name: stg_sellers
+    description: >
+      Vendeurs nettoyés : une ligne par vendeur.
+      Mêmes noms de colonnes de localisation que stg_customers.
+    columns:
+      - name: seller_id
+        description: Identifiant unique du vendeur (clé de jointure avec stg_order_items).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: zip_code_prefix
+        description: Cinq premiers chiffres du code postal du vendeur (texte).
+
+      - name: city
+        description: Ville du vendeur.
+
+      - name: state
+        description: État (province) du vendeur, en abréviation de deux lettres (ex. SP).
+        data_tests:
+          - not_null
