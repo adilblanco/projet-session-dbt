@@ -83,6 +83,16 @@ Les principaux choix du projet, la notion du cours qui les justifie et la preuve
 Montants (articles, frais de port, total), nombre d'articles, délai de livraison, retard, note et sentiment de l'avis.
 *Preuve :* 6,8 % des commandes livrées sont en retard ; chiffre d'affaires de 15,8 M BRL.
 
+**`fct_order_items` : une ligne par article**
+*Choix :* deuxième fait au grain le plus fin, relié aux produits, vendeurs, clients et date d'achat.
+*Notion :* grain atomique ; permet les analyses par produit et par vendeur, impossibles avec `fct_orders`.
+*Preuve :* 112 650 articles en staging = 112 650 lignes ; test `unique_combination_of_columns` PASS.
+
+**Deux faits cohérents**
+*Choix :* `fct_orders` et `fct_order_items` partagent `dim_customers` et `dim_date`.
+*Notion :* matrice en bus ; dimensions conformes entre faits.
+*Preuve :* même chiffre d'affaires aux deux grains : 15 843 553 BRL.
+
 
 ## Tests
 

@@ -214,3 +214,75 @@ models:
 
       - name: sentiment_label
         description: Sentiment du commentaire (positive, neutral, negative) ; null si aucun commentaire.
+
+  - name: fct_order_items
+    description: >
+      Fait article : une ligne par article de commande (grain atomique des ventes).
+      Relié à dim_products, dim_sellers, dim_customers et dim_date (rôle « date d'achat »).
+      Clé composée : order_id + order_item_number.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - order_item_number
+    columns:
+      - name: order_id
+        description: Identifiant de la commande (dimension dégénérée).
+        data_tests:
+          - not_null
+
+      - name: order_item_number
+        description: Numéro de l'article dans la commande (dimension dégénérée).
+        data_tests:
+          - not_null
+
+      - name: product_sk
+        description: Clé du produit dans dim_products.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_sk
+
+      - name: seller_sk
+        description: Clé du vendeur dans dim_sellers.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_sellers')
+                field: seller_sk
+
+      - name: customer_sk
+        description: Clé du client (personne) dans dim_customers.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_sk
+
+      - name: purchase_date_sk
+        description: "Rôle « date d'achat » de dim_date."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_sk
+
+      - name: price
+        description: Prix de l'article, en BRL.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+
+      - name: freight
+        description: Frais de port de l'article, en BRL.
+
+      - name: item_total
+        description: Montant total de l'article (prix + frais de port), en BRL.
