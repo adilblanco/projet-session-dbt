@@ -129,3 +129,4 @@ Montants (articles, frais de port, total), nombre d'articles, délai de livraiso
 | `accepted_values`, `accepted_range` | les valeurs sont plausibles |
 | `unique_combination_of_columns` | le grain d'une clé composée est respecté |
 | `severity: warn` | un problème connu reste visible sans bloquer (13 produits sans traduction) |
+| test singulier `assert_revenue_matches_between_facts` | les deux faits donnent le même chiffre d'affaires |
