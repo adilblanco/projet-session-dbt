@@ -1,0 +1,58 @@
+version: 2
+
+sources:
+  - name: olist
+    description: Fichiers CSV bruts du jeu de données Olist Brazilian E-Commerce (Kaggle).
+    # DuckDB lit chaque CSV directement ; {identifier} = nom du fichier sans .csv
+    meta:
+      external_location: "read_csv('data/raw/{identifier}.csv', header = true)"
+
+    tables:
+      - name: orders
+        identifier: olist_orders_dataset
+        description: >
+          Table centrale : une ligne par commande, avec son statut et les dates du cycle de vie
+          (achat, approbation, remise au transporteur, livraison réelle et estimée).
+          Reliée aux clients par customer_id, et aux articles, paiements et avis par order_id.
+
+      - name: customers
+        identifier: olist_customers_dataset
+        description: >
+          Une ligne par customer_id. Ce customer_id change à chaque commande ;
+          customer_unique_id identifie la personne. Reliée aux commandes par customer_id.
+
+      - name: order_items
+        identifier: olist_order_items_dataset
+        description: >
+          Une ligne par article d'une commande, avec prix et frais de port.
+          Reliée aux commandes par order_id, aux produits par product_id et aux vendeurs par seller_id.
+
+      - name: order_payments
+        identifier: olist_order_payments_dataset
+        description: >
+          Une ligne par paiement (une commande peut avoir plusieurs paiements).
+          Reliée aux commandes par order_id.
+
+      - name: order_reviews
+        identifier: olist_order_reviews_dataset
+        description: >
+          Avis des clients : note de 1 à 5 et commentaire libre en portugais.
+          Reliée aux commandes par order_id ; une commande peut avoir plusieurs avis.
+
+      - name: products
+        identifier: olist_products_dataset
+        description: >
+          Une ligne par produit, avec sa catégorie (en portugais) et ses attributs physiques.
+          Reliée aux articles par product_id.
+
+      - name: sellers
+        identifier: olist_sellers_dataset
+        description: >
+          Une ligne par vendeur, avec sa localisation (ville, état, préfixe de code postal).
+          Reliée aux articles par seller_id.
+
+      - name: product_category_name_translation
+        identifier: product_category_name_translation
+        description: >
+          Traduction des noms de catégories de produits du portugais vers l'anglais.
+          Reliée aux produits par product_category_name.
