@@ -223,7 +223,15 @@ models:
       - name: product_category_name
         description: >
           Catégorie du produit en portugais (clé de jointure avec la table de traduction).
-          Null pour 610 produits.
+          Null pour 610 produits ; 2 catégories n'ont pas de traduction.
+        data_tests:
+          # Avertissement seulement : 2 catégories sans traduction connues à la source
+          - relationships:
+              arguments:
+                to: ref('stg_product_category_translation')
+                field: product_category_name
+              config:
+                severity: warn
 
       - name: name_length
         description: Nombre de caractères du nom du produit.
@@ -272,5 +280,21 @@ models:
 
       - name: state
         description: État (province) du vendeur, en abréviation de deux lettres (ex. SP).
+        data_tests:
+          - not_null
+
+  - name: stg_product_category_translation
+    description: >
+      Table de correspondance des catégories de produits : une ligne par catégorie,
+      nom en portugais et traduction en anglais. Sera intégrée à dim_products.
+    columns:
+      - name: product_category_name
+        description: Nom de la catégorie en portugais (clé de jointure avec stg_products).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_category_name_en
+        description: Nom de la catégorie traduit en anglais.
         data_tests:
           - not_null

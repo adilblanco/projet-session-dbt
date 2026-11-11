@@ -51,7 +51,7 @@ sources:
           Une ligne par vendeur, avec sa localisation (ville, état, préfixe de code postal).
           Reliée aux articles par seller_id.
 
-      - name: product_category_name_translation
+      - name: product_category_translation
         identifier: product_category_name_translation
         description: >
           Traduction des noms de catégories de produits du portugais vers l'anglais.
