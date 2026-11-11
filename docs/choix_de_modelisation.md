@@ -86,7 +86,7 @@ Montants (articles, frais de port, total), nombre d'articles, délai de livraiso
 **Chiffre d'affaires calculé à partir des articles, pas des paiements**
 *Choix :* chiffre d'affaires = prix des articles + frais de port. `stg_order_payments` est préparé en staging, mais n'est utilisé par aucun fait.
 *Notion :* définir clairement une mesure ; une seule définition du chiffre d'affaires.
-*Preuve :* articles : 15,84 M BRL ; paiements : 16,01 M BRL (l'écart vient des frais des paiements en plusieurs versements).
+*Preuve :* articles : 15,84 M BRL ; paiements : 16,01 M BRL. L'écart vient surtout de 775 commandes payées mais sans article (indisponibles ou annulées, 162 592 BRL). Pour les commandes qui ont des articles, les deux totaux ne diffèrent que de 2 870 BRL.
 
 **Livraison définie par la date, pas par le statut**
 *Choix :* une commande est livrée si elle a une date de livraison au client.
