@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: int_review_sentiment
+    description: >
+      Avis retenu pour chaque commande (le plus récent selon answered_at) et score de sentiment
+      de son commentaire, calculé avec le seed sentiment_lexicon.
+      Grain : une ligne par commande ayant au moins un avis.
+    columns:
+      - name: order_id
+        description: Identifiant de la commande ; unique ici, ce qui prouve le dédoublonnage des avis.
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+
+      - name: review_id
+        description: Identifiant de l'avis retenu (le plus récent de la commande).
+        data_tests:
+          - not_null
+
+      - name: review_score
+        description: Note de satisfaction de l'avis retenu, de 1 à 5.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+
+      - name: has_comment
+        description: Vrai si l'avis retenu contient un commentaire.
+
+      - name: answered_at
+        description: Date et heure de la réponse du client à l'avis retenu.
+
+      - name: sentiment_score
+        description: >
+          Somme des polarités (+1 / -1) des mots du commentaire présents dans le lexique.
+          0 si aucun mot reconnu ; null si l'avis n'a pas de commentaire.
+
+      - name: sentiment_label
+        description: >
+          Sentiment du commentaire : positive (score > 0), negative (score < 0) ou neutral (score = 0).
+          Null si l'avis n'a pas de commentaire.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['positive', 'neutral', 'negative']
