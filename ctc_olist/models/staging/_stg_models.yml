@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: >
+      Commandes nettoyées : une ligne par commande (même grain que la source).
+      Colonnes renommées et dates converties en timestamp/date.
+    columns:
+      - name: order_id
+        description: Identifiant unique de la commande.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: >
+          Identifiant du client pour cette commande. Change à chaque commande :
+          utiliser customer_unique_id (stg_customers) pour identifier la personne.
+        data_tests:
+          - not_null
+
+      - name: order_status
+        description: Statut de la commande (livrée, expédiée, annulée…).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['delivered', 'shipped', 'canceled', 'unavailable', 'invoiced', 'processing', 'created', 'approved']
+
+      - name: purchased_at
+        description: Date et heure de l'achat.
+        data_tests:
+          - not_null
+
+      - name: approved_at
+        description: Date et heure de l'approbation du paiement.
+
+      - name: delivered_to_carrier_at
+        description: Date et heure de la remise au transporteur.
+
+      - name: delivered_to_customer_at
+        description: Date et heure de la livraison au client. Nulle si la commande n'est pas livrée.
+
+      - name: estimated_delivery_date
+        description: Date de livraison estimée communiquée au client à l'achat.
