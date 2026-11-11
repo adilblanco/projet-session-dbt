@@ -1,16 +1,11 @@
-
-# Name your project! Project names should contain only lowercase characters
-# and underscores. A good package name should reflect your organization's
-# name or the intended use of these models
+# Nom du projet dbt (minuscules et soulignés seulement).
 name: 'ctc_olist'
 version: '1.0.0'
 
-# This setting configures which "profile" dbt uses for this project.
+# Profil de connexion (défini dans profiles.yml).
 profile: 'ctc_olist'
 
-# These configurations specify where dbt should look for different types of files.
-# The `model-paths` config, for example, states that models in this project can be
-# found in the "models/" directory. You probably won't need to change these!
+# Dossiers où dbt cherche chaque type de fichier.
 model-paths: ["models"]
 analysis-paths: ["analyses"]
 test-paths: ["tests"]
@@ -18,19 +13,21 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
-clean-targets:         # directories to be removed by `dbt clean`
+# dossiers supprimés par la commande `dbt clean`
+clean-targets:
   - "target"
   - "dbt_packages"
 
 
-# Configuring models
-# Full documentation: https://docs.getdbt.com/docs/configuring-models
-
-# In this example config, we tell dbt to build all models in the example/
-# directory as views. These settings can be overridden in the individual model
-# files using the `{{ config(...) }}` macro.
+# Configuration des modèles
+# Documentation : https://docs.getdbt.com/docs/configuring-models
+#
+# Matérialisation par couche (le « + » s'applique à tous les modèles du dossier) :
+#   - staging : vues (léger, simple nettoyage des sources)
+#   - marts   : tables (faits et dimensions, interrogés souvent)
 models:
   ctc_olist:
-    # Config indicated by + and applies to all files under models/example/
-    example:
+    staging:
       +materialized: view
+    marts:
+      +materialized: table
