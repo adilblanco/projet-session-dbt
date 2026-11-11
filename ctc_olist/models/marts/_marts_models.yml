@@ -66,3 +66,41 @@ models:
 
       - name: is_weekend
         description: Vrai le samedi et le dimanche.
+
+  - name: dim_products
+    description: >
+      Dimension produit : une ligne par produit.
+      La traduction anglaise de la catégorie est intégrée (dénormalisation, schéma en étoile).
+    columns:
+      - name: product_sk
+        description: Clé de substitution du produit (hash de product_id).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        description: "Clé naturelle : identifiant du produit dans la source."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: category_name
+        description: >
+          Catégorie en anglais. Nom portugais si la traduction manque (2 catégories),
+          « unknown » si le produit n'a pas de catégorie (610 produits).
+        data_tests:
+          - not_null
+
+      - name: category_name_pt
+        description: Catégorie d'origine en portugais ; « unknown » si absente.
+        data_tests:
+          - not_null
+
+      - name: photos_count
+        description: Nombre de photos publiées pour le produit.
+
+      - name: weight_g
+        description: Poids du produit, en grammes.
+
+      - name: volume_cm3
+        description: Volume du colis, en centimètres cubes.
