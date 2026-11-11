@@ -1,0 +1,28 @@
+version: 2
+
+seeds:
+  - name: sentiment_lexicon
+    description: >
+      Lexique de sentiment en portugais (minuscules, sans accents) pour noter les commentaires d'avis.
+      Construit à partir de l'analyse analyses/sentiment_word_scores.sql : mots d'opinion fréquents
+      retenus selon la note moyenne des avis qui les contiennent.
+    config:
+      # Types fixés plutôt que devinés par DuckDB
+      column_types:
+        word: varchar
+        polarity: integer
+    columns:
+      - name: word
+        description: Mot en portugais, en minuscules et sans accents.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: polarity
+        description: Polarité du mot (+1 positif, -1 négatif).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, -1]
+                quote: false
