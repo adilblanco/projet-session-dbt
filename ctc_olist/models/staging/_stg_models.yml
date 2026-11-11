@@ -115,3 +115,46 @@ models:
 
       - name: item_total
         description: Montant total de l'article (price + freight), en BRL.
+
+  - name: stg_order_payments
+    description: >
+      Paiements nettoyés : une ligne par paiement d'une commande.
+      Une commande peut avoir plusieurs paiements. Clé composée : order_id + payment_number.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - payment_number
+    columns:
+      - name: order_id
+        description: Identifiant de la commande (clé de jointure avec stg_orders).
+        data_tests:
+          - not_null
+
+      - name: payment_number
+        description: Numéro séquentiel du paiement dans la commande (1, 2, 3…).
+        data_tests:
+          - not_null
+
+      - name: payment_type
+        description: >
+          Moyen de paiement (carte de crédit, boleto, bon d'achat, carte de débit).
+          3 paiements ont la valeur not_defined à la source.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined']
+
+      - name: installments
+        description: >
+          Nombre de versements choisis par le client.
+          Quelques paiements par carte de crédit valent 0 à la source (anomalie conservée).
+
+      - name: amount
+        description: Montant du paiement, en BRL.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
