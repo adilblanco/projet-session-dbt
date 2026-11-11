@@ -1,2 +1,4 @@
-dbt-duckdb
-dbt-metricflow[dbt-duckdb]
+dbt-core==1.12.6
+dbt-duckdb==1.11.1
+dbt-metricflow[dbt-duckdb]==0.15.0
+duckdb==2.0.0

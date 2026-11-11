@@ -83,6 +83,16 @@ Les principaux choix du projet, la notion du cours qui les justifie et la preuve
 Montants (articles, frais de port, total), nombre d'articles, délai de livraison, retard, note et sentiment de l'avis.
 *Preuve :* 6,8 % des commandes livrées sont en retard ; chiffre d'affaires de 15,8 M BRL.
 
+**Chiffre d'affaires calculé à partir des articles, pas des paiements**
+*Choix :* chiffre d'affaires = prix des articles + frais de port. `stg_order_payments` est préparé en staging, mais n'est utilisé par aucun fait.
+*Notion :* définir clairement une mesure ; une seule définition du chiffre d'affaires.
+*Preuve :* articles : 15,84 M BRL ; paiements : 16,01 M BRL (l'écart vient des frais des paiements en plusieurs versements).
+
+**Livraison définie par la date, pas par le statut**
+*Choix :* une commande est livrée si elle a une date de livraison au client.
+*Notion :* règle métier explicite face à des données incohérentes.
+*Preuve :* 8 commandes ont le statut `delivered` sans date ; 6 ont une date sans ce statut.
+
 **`fct_order_items` : une ligne par article**
 *Choix :* deuxième fait au grain le plus fin, relié aux produits, vendeurs, clients et date d'achat.
 *Notion :* grain atomique ; permet les analyses par produit et par vendeur, impossibles avec `fct_orders`.

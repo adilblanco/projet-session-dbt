@@ -29,5 +29,9 @@ models:
   ctc_olist:
     staging:
       +materialized: view
+    intermediate:
+      +materialized: view
     marts:
       +materialized: table
+    semantic:
+      +materialized: view
