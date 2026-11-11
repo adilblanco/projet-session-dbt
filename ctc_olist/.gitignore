@@ -3,3 +3,10 @@ target/
 dbt_packages/
 logs/
 .env
+
+# Base DuckDB locale
+*.duckdb
+*.duckdb.wal
+
+# Identifiant anonyme dbt
+.user.yml
