@@ -29,3 +29,40 @@ models:
         description: État de la dernière adresse connue (niveau haut de la hiérarchie).
         data_tests:
           - not_null
+
+  - name: dim_date
+    description: >
+      Dimension date générée : une ligne par jour de 2016 à 2018, plus une ligne « Unknown »
+      pour les dates nulles des faits. Hiérarchie : jour -> mois -> trimestre -> année.
+      Utilisée dans plusieurs rôles (achat, livraison estimée, livraison réelle).
+    columns:
+      - name: date_sk
+        description: Clé de substitution de la date (hash de date_day ; la ligne Unknown a le hash d'une date nulle).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date_day
+        description: Le jour (null pour la ligne Unknown).
+        data_tests:
+          - unique
+
+      - name: year
+        description: Année.
+
+      - name: quarter
+        description: Trimestre (1 à 4).
+
+      - name: month
+        description: Mois (1 à 12).
+
+      - name: year_month
+        description: Année et mois au format AAAA-MM ; « Unknown » pour la ligne inconnue.
+        data_tests:
+          - not_null
+
+      - name: day_name
+        description: Nom du jour de la semaine (en anglais).
+
+      - name: is_weekend
+        description: Vrai le samedi et le dimanche.
