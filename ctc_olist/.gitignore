@@ -10,3 +10,6 @@ logs/
 
 # Identifiant anonyme dbt
 .user.yml
+
+# Données brutes (récupérées par scripts/download_data.sh)
+data/raw/
