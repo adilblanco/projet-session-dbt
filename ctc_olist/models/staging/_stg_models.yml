@@ -42,3 +42,30 @@ models:
 
       - name: estimated_delivery_date
         description: Date de livraison estimée communiquée au client à l'achat.
+
+  - name: stg_customers
+    description: >
+      Clients nettoyés : une ligne par customer_id (même grain que la source).
+      Un même client a un customer_id différent à chaque commande.
+    columns:
+      - name: customer_id
+        description: Identifiant du client pour une commande donnée (clé de jointure avec stg_orders).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_unique_id
+        description: Identifiant unique de la personne, stable d'une commande à l'autre.
+        data_tests:
+          - not_null
+
+      - name: zip_code_prefix
+        description: Cinq premiers chiffres du code postal du client (texte).
+
+      - name: city
+        description: Ville du client.
+
+      - name: state
+        description: État (province) du client, en abréviation de deux lettres (ex. SP).
+        data_tests:
+          - not_null
