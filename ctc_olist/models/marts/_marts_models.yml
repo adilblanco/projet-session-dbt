@@ -104,3 +104,31 @@ models:
 
       - name: volume_cm3
         description: Volume du colis, en centimètres cubes.
+
+  - name: dim_sellers
+    description: >
+      Dimension vendeur : une ligne par vendeur.
+      Hiérarchie géographique : ville -> état, avec les mêmes colonnes que dim_customers.
+    columns:
+      - name: seller_sk
+        description: Clé de substitution du vendeur (hash de seller_id).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: seller_id
+        description: "Clé naturelle : identifiant du vendeur dans la source."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: zip_code_prefix
+        description: Cinq premiers chiffres du code postal du vendeur.
+
+      - name: city
+        description: Ville du vendeur (niveau bas de la hiérarchie).
+
+      - name: state
+        description: État du vendeur (niveau haut de la hiérarchie).
+        data_tests:
+          - not_null
