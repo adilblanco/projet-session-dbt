@@ -132,3 +132,85 @@ models:
         description: État du vendeur (niveau haut de la hiérarchie).
         data_tests:
           - not_null
+
+  - name: fct_orders
+    description: >
+      Fait commande : une ligne par commande (snapshot cumulatif achat -> livraison -> avis).
+      Relié à dim_customers et à dim_date dans trois rôles (achat, livraison estimée, livraison réelle).
+    columns:
+      - name: order_id
+        description: Identifiant de la commande (dimension dégénérée) ; définit le grain.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: order_status
+        description: Statut de la commande (dimension dégénérée).
+
+      - name: customer_sk
+        description: Clé du client (personne) dans dim_customers.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_sk
+
+      - name: purchase_date_sk
+        description: "Rôle « date d'achat » de dim_date."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_sk
+
+      - name: estimated_delivery_date_sk
+        description: "Rôle « date de livraison estimée » de dim_date."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_sk
+
+      - name: delivered_date_sk
+        description: "Rôle « date de livraison réelle » de dim_date ; ligne Unknown si non livrée."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_sk
+
+      - name: items_count
+        description: Nombre d'articles de la commande (0 si aucun article).
+
+      - name: items_amount
+        description: Somme des prix des articles, en BRL.
+
+      - name: freight_amount
+        description: Somme des frais de port, en BRL.
+
+      - name: order_amount
+        description: Montant total de la commande (articles + frais de port), en BRL.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+
+      - name: delivery_days
+        description: Jours entre l'achat et la livraison au client ; null si non livrée.
+
+      - name: is_late
+        description: Vrai si livrée après la date estimée ; null si non livrée.
+
+      - name: review_score
+        description: Note de l'avis retenu (1 à 5) ; null si aucun avis.
+
+      - name: sentiment_score
+        description: Score de sentiment du commentaire ; null si aucun commentaire.
+
+      - name: sentiment_label
+        description: Sentiment du commentaire (positive, neutral, negative) ; null si aucun commentaire.
