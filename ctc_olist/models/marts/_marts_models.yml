@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      Dimension client : une ligne par personne (customer_unique_id).
+      SCD type 1 : seule la dernière adresse connue est conservée (commande la plus récente).
+      Hiérarchie géographique : ville -> état.
+    columns:
+      - name: customer_sk
+        description: Clé de substitution du client (hash de customer_unique_id).
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_unique_id
+        description: "Clé naturelle : identifiant de la personne dans la source."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: zip_code_prefix
+        description: Cinq premiers chiffres du code postal de la dernière adresse connue.
+
+      - name: city
+        description: Ville de la dernière adresse connue (niveau bas de la hiérarchie).
+
+      - name: state
+        description: État de la dernière adresse connue (niveau haut de la hiérarchie).
+        data_tests:
+          - not_null
