@@ -1,1 +1,2 @@
 dbt-duckdb
+dbt-metricflow[dbt-duckdb]
