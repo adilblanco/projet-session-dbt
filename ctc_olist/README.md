@@ -9,7 +9,7 @@ brésilien en un modèle prêt pour l'analyse de la satisfaction client.
 
 ## Les couches du pipeline
 
-Les données traversent trois couches, chacune avec un rôle précis.
+Les données traversent quatre couches, chacune avec un rôle précis.
 
 **Staging** : nettoyer chaque source, une par une.
 On renomme les colonnes, on convertit les types et on fait des calculs simples.
@@ -21,6 +21,11 @@ Ces modèles ne sont pas destinés aux utilisateurs finaux.
 
 **Marts** : le modèle dimensionnel (faits et dimensions).
 C'est ce que les analystes interrogent.
+
+**Semantic** : les métriques métier, définies une seule fois.
+Tout le monde calcule le même indicateur de la même façon.
+
+Les choix de modélisation et leur justification sont détaillés dans `../docs/choix_de_modelisation.md`.
 
 
 ## Étapes de construction
@@ -70,6 +75,32 @@ Le sentiment calculé suit bien la note donnée par le client :
 | neutre | 11 909 | 3,55 |
 | positif | 19 106 | 4,69 |
 
+### 8. Dimensions (marts)
+Quatre dimensions, chacune avec une clé de substitution `*_sk` :
+
+- `dim_customers` : une ligne par personne ; seule la dernière adresse est gardée (SCD type 1).
+- `dim_date` : un jour par ligne (2016 à 2018), plus une ligne « Unknown » pour les dates manquantes.
+- `dim_products` : la catégorie traduite en anglais est intégrée au produit.
+- `dim_sellers` : une ligne par vendeur.
+
+### 9. Faits (marts)
+- `fct_orders` : une ligne par commande. Montant, délai de livraison, retard, note et sentiment de l'avis.
+- `fct_order_items` : une ligne par article. Prix et frais de port, par produit et par vendeur.
+
+Les deux faits donnent le même chiffre d'affaires : 15 843 553 BRL.
+
+### 10. Couche sémantique (MetricFlow)
+Un calendrier (`metricflow_time_spine`), un modèle sémantique sur `fct_orders`
+et cinq métriques principales dans `models/semantic/_semantic_models.yml` :
+
+| Métrique | Définition |
+|---|---|
+| `total_revenue` | chiffre d'affaires |
+| `average_order_value` | panier moyen |
+| `late_delivery_rate` | part des commandes livrées en retard |
+| `average_review_score` | note moyenne des avis |
+| `negative_sentiment_rate` | part des commentaires négatifs |
+
 
 ## Commandes dbt
 
@@ -88,6 +119,24 @@ Toutes les commandes se lancent depuis le dossier `ctc_olist/`.
 
 Pour cibler un seul modèle, ajouter `--select <modèle>`.
 Exemple : `dbt build --select stg_orders`.
+Avec `+` devant le nom (`--select +fct_orders`), dbt construit aussi tout ce dont le modèle dépend.
+
+## Commandes MetricFlow
+
+| Commande | Ce qu'elle fait |
+|---|---|
+| `mf validate-configs` | vérifie le modèle sémantique et les métriques |
+| `mf list metrics` | liste les métriques disponibles |
+| `mf query --metrics <métrique> --group-by metric_time__month` | calcule une métrique par mois |
+
+Ajouter `--order metric_time__month` pour trier par date.
+Remplacer `__month` par `__day`, `__quarter` ou `__year` pour changer de granularité.
+
+Exemple :
+
+```bash
+mf query --metrics total_revenue,late_delivery_rate --group-by metric_time__year
+```
 
 **Premier lancement** :
 
