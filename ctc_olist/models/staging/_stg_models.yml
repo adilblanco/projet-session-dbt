@@ -158,3 +158,53 @@ models:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
+
+  - name: stg_order_reviews
+    description: >
+      Avis clients nettoyés : une ligne par avis (même grain que la source).
+      Une commande peut avoir plusieurs avis ; le plus récent sera retenu dans la couche intermédiaire.
+      Clé composée : review_id + order_id.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - review_id
+              - order_id
+    columns:
+      - name: review_id
+        description: Identifiant de l'avis (non unique seul à la source).
+        data_tests:
+          - not_null
+
+      - name: order_id
+        description: Identifiant de la commande évaluée (clé de jointure avec stg_orders).
+        data_tests:
+          - not_null
+
+      - name: review_score
+        description: Note de satisfaction donnée par le client, de 1 à 5.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+
+      - name: comment_title
+        description: Titre du commentaire (portugais). Vide pour environ 88 % des avis.
+
+      - name: comment_message
+        description: >
+          Commentaire libre du client en portugais (source non structurée).
+          Null si absent ou composé uniquement d'espaces.
+
+      - name: survey_sent_date
+        description: Date d'envoi du questionnaire de satisfaction au client.
+
+      - name: answered_at
+        description: Date et heure de la réponse du client ; sert à retenir l'avis le plus récent.
+
+      - name: has_comment
+        description: Vrai si le client a écrit un commentaire (comment_message non null).
+        data_tests:
+          - not_null
