@@ -1,4 +1,4 @@
--- Fait commande : une ligne par commande (snapshot cumulatif du processus achat -> livraison -> avis).
+-- Fait commande : une ligne par commande (table de situation : suit la commande de l'achat à l'avis).
 
 with orders as (
 

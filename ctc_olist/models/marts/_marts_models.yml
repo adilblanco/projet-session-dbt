@@ -58,7 +58,7 @@ models:
 
   - name: fct_orders
     description: >
-      Fait commande : une ligne par commande (snapshot cumulatif achat -> livraison -> avis).
+      Fait commande : une ligne par commande (table de situation : suit la commande de l'achat à l'avis).
       Relié à dim_customers et à dim_date (date d'achat).
     columns:
       - name: order_id

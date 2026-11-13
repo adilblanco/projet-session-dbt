@@ -19,12 +19,11 @@ clean-targets:
   - "dbt_packages"
 
 
-# Configuration des modèles
-# Documentation : https://docs.getdbt.com/docs/configuring-models
-#
 # Matérialisation par couche (le « + » s'applique à tous les modèles du dossier) :
-#   - staging : vues (léger, simple nettoyage des sources)
-#   - marts   : tables (faits et dimensions, interrogés souvent)
+#   - staging      : vues (simple nettoyage des sources)
+#   - intermediate : vues (règles métier, non destinées aux utilisateurs)
+#   - marts        : tables (faits et dimensions, interrogés souvent)
+#   - semantic     : vues (calendrier de MetricFlow)
 models:
   ctc_olist:
     staging:
