@@ -43,8 +43,6 @@ final as (
         -- clés étrangères (même calcul de hash que dans les dimensions)
         {{ dbt_utils.generate_surrogate_key(['customers.customer_unique_id']) }}            as customer_sk,
         {{ dbt_utils.generate_surrogate_key(['cast(orders.purchased_at as date)']) }}       as purchase_date_sk,
-        {{ dbt_utils.generate_surrogate_key(['orders.estimated_delivery_date']) }}          as estimated_delivery_date_sk,
-        {{ dbt_utils.generate_surrogate_key(['cast(orders.delivered_to_customer_at as date)']) }} as delivered_date_sk,
 
         -- date d'achat en clair : axe temporel de la couche sémantique (MetricFlow)
         cast(orders.purchased_at as date) as purchase_date,

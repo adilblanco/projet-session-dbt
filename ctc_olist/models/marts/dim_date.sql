@@ -1,4 +1,4 @@
--- Dimension date : une ligne par jour (2016 à 2018) + une ligne « inconnue » pour les dates nulles.
+-- Dimension date : une ligne par jour (2016 à 2018).
 -- Hiérarchie : jour -> mois -> trimestre -> année.
 
 with days as (
@@ -12,9 +12,11 @@ with days as (
 
 ),
 
-calendar as (
+final as (
 
     select
+        -- même calcul de clé que dans les faits
+        {{ dbt_utils.generate_surrogate_key(['cast(date_day as date)']) }} as date_sk,
         cast(date_day as date)              as date_day,
         extract(year from date_day)         as year,
         extract(quarter from date_day)      as quarter,
@@ -24,35 +26,6 @@ calendar as (
         extract(isodow from date_day) >= 6  as is_weekend
 
     from days
-
-),
-
--- Ligne « inconnue » : les faits dont la date est nulle (ex. commande non livrée) pointent ici
-unknown as (
-
-    select
-        cast(null as date)    as date_day,
-        cast(null as bigint)  as year,
-        cast(null as bigint)  as quarter,
-        cast(null as bigint)  as month,
-        'Unknown'             as year_month,
-        'Unknown'             as day_name,
-        cast(null as boolean) as is_weekend
-
-),
-
-final as (
-
-    select
-        -- même calcul de clé que dans les faits : une date nulle donne la clé de la ligne inconnue
-        {{ dbt_utils.generate_surrogate_key(['date_day']) }} as date_sk,
-        *
-
-    from (
-        select * from calendar
-        union all
-        select * from unknown
-    )
 
 )
 

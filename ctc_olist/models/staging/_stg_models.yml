@@ -93,12 +93,12 @@ models:
           - not_null
 
       - name: product_id
-        description: Identifiant du produit vendu (clé de jointure avec stg_products).
+        description: Identifiant du produit vendu.
         data_tests:
           - not_null
 
       - name: seller_id
-        description: Identifiant du vendeur (clé de jointure avec stg_sellers).
+        description: Identifiant du vendeur.
         data_tests:
           - not_null
 
@@ -115,49 +115,6 @@ models:
 
       - name: item_total
         description: Montant total de l'article (price + freight), en BRL.
-
-  - name: stg_order_payments
-    description: >
-      Paiements nettoyés : une ligne par paiement d'une commande.
-      Une commande peut avoir plusieurs paiements. Clé composée : order_id + payment_number.
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns:
-              - order_id
-              - payment_number
-    columns:
-      - name: order_id
-        description: Identifiant de la commande (clé de jointure avec stg_orders).
-        data_tests:
-          - not_null
-
-      - name: payment_number
-        description: Numéro séquentiel du paiement dans la commande (1, 2, 3…).
-        data_tests:
-          - not_null
-
-      - name: payment_type
-        description: >
-          Moyen de paiement (carte de crédit, boleto, bon d'achat, carte de débit).
-          3 paiements ont la valeur not_defined à la source.
-        data_tests:
-          - accepted_values:
-              arguments:
-                values: ['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined']
-
-      - name: installments
-        description: >
-          Nombre de versements choisis par le client.
-          Quelques paiements par carte de crédit valent 0 à la source (anomalie conservée).
-
-      - name: amount
-        description: Montant du paiement, en BRL.
-        data_tests:
-          - not_null
-          - dbt_utils.accepted_range:
-              arguments:
-                min_value: 0
 
   - name: stg_order_reviews
     description: >
@@ -206,95 +163,5 @@ models:
 
       - name: has_comment
         description: Vrai si le client a écrit un commentaire (comment_message non null).
-        data_tests:
-          - not_null
-
-  - name: stg_products
-    description: >
-      Produits nettoyés : une ligne par produit.
-      Colonnes mal orthographiées à la source (« lenght ») corrigées.
-    columns:
-      - name: product_id
-        description: Identifiant unique du produit.
-        data_tests:
-          - unique
-          - not_null
-
-      - name: product_category_name
-        description: >
-          Catégorie du produit en portugais (clé de jointure avec la table de traduction).
-          Null pour 610 produits ; 2 catégories n'ont pas de traduction.
-        data_tests:
-          # Avertissement seulement : 2 catégories sans traduction connues à la source
-          - relationships:
-              arguments:
-                to: ref('stg_product_category_translation')
-                field: product_category_name
-              config:
-                severity: warn
-
-      - name: name_length
-        description: Nombre de caractères du nom du produit.
-
-      - name: description_length
-        description: Nombre de caractères de la description du produit.
-
-      - name: photos_count
-        description: Nombre de photos publiées pour le produit.
-
-      - name: weight_g
-        description: Poids du produit, en grammes.
-        data_tests:
-          - dbt_utils.accepted_range:
-              arguments:
-                min_value: 0
-
-      - name: length_cm
-        description: Longueur du colis, en centimètres.
-
-      - name: height_cm
-        description: Hauteur du colis, en centimètres.
-
-      - name: width_cm
-        description: Largeur du colis, en centimètres.
-
-      - name: volume_cm3
-        description: Volume du colis (longueur × hauteur × largeur), en centimètres cubes.
-
-  - name: stg_sellers
-    description: >
-      Vendeurs nettoyés : une ligne par vendeur.
-      Mêmes noms de colonnes de localisation que stg_customers.
-    columns:
-      - name: seller_id
-        description: Identifiant unique du vendeur (clé de jointure avec stg_order_items).
-        data_tests:
-          - unique
-          - not_null
-
-      - name: zip_code_prefix
-        description: Cinq premiers chiffres du code postal du vendeur (texte).
-
-      - name: city
-        description: Ville du vendeur.
-
-      - name: state
-        description: État (province) du vendeur, en abréviation de deux lettres (ex. SP).
-        data_tests:
-          - not_null
-
-  - name: stg_product_category_translation
-    description: >
-      Table de correspondance des catégories de produits : une ligne par catégorie,
-      nom en portugais et traduction en anglais. Sera intégrée à dim_products.
-    columns:
-      - name: product_category_name
-        description: Nom de la catégorie en portugais (clé de jointure avec stg_products).
-        data_tests:
-          - unique
-          - not_null
-
-      - name: product_category_name_en
-        description: Nom de la catégorie traduit en anglais.
         data_tests:
           - not_null

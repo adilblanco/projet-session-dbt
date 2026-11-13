@@ -32,20 +32,20 @@ models:
 
   - name: dim_date
     description: >
-      Dimension date générée : une ligne par jour de 2016 à 2018, plus une ligne « Unknown »
-      pour les dates nulles des faits. Hiérarchie : jour -> mois -> trimestre -> année.
-      Utilisée dans plusieurs rôles (achat, livraison estimée, livraison réelle).
+      Dimension date générée : une ligne par jour de 2016 à 2018.
+      Hiérarchie : jour -> mois -> trimestre -> année.
     columns:
       - name: date_sk
-        description: Clé de substitution de la date (hash de date_day ; la ligne Unknown a le hash d'une date nulle).
+        description: Clé de substitution de la date (hash de date_day).
         data_tests:
           - unique
           - not_null
 
       - name: date_day
-        description: Le jour (null pour la ligne Unknown).
+        description: Le jour.
         data_tests:
           - unique
+          - not_null
 
       - name: year
         description: Année.
@@ -57,7 +57,7 @@ models:
         description: Mois (1 à 12).
 
       - name: year_month
-        description: Année et mois au format AAAA-MM ; « Unknown » pour la ligne inconnue.
+        description: Année et mois au format AAAA-MM.
         data_tests:
           - not_null
 
@@ -67,76 +67,10 @@ models:
       - name: is_weekend
         description: Vrai le samedi et le dimanche.
 
-  - name: dim_products
-    description: >
-      Dimension produit : une ligne par produit.
-      La traduction anglaise de la catégorie est intégrée (dénormalisation, schéma en étoile).
-    columns:
-      - name: product_sk
-        description: Clé de substitution du produit (hash de product_id).
-        data_tests:
-          - unique
-          - not_null
-
-      - name: product_id
-        description: "Clé naturelle : identifiant du produit dans la source."
-        data_tests:
-          - unique
-          - not_null
-
-      - name: category_name
-        description: >
-          Catégorie en anglais. Nom portugais si la traduction manque (2 catégories),
-          « unknown » si le produit n'a pas de catégorie (610 produits).
-        data_tests:
-          - not_null
-
-      - name: category_name_pt
-        description: Catégorie d'origine en portugais ; « unknown » si absente.
-        data_tests:
-          - not_null
-
-      - name: photos_count
-        description: Nombre de photos publiées pour le produit.
-
-      - name: weight_g
-        description: Poids du produit, en grammes.
-
-      - name: volume_cm3
-        description: Volume du colis, en centimètres cubes.
-
-  - name: dim_sellers
-    description: >
-      Dimension vendeur : une ligne par vendeur.
-      Hiérarchie géographique : ville -> état, avec les mêmes colonnes que dim_customers.
-    columns:
-      - name: seller_sk
-        description: Clé de substitution du vendeur (hash de seller_id).
-        data_tests:
-          - unique
-          - not_null
-
-      - name: seller_id
-        description: "Clé naturelle : identifiant du vendeur dans la source."
-        data_tests:
-          - unique
-          - not_null
-
-      - name: zip_code_prefix
-        description: Cinq premiers chiffres du code postal du vendeur.
-
-      - name: city
-        description: Ville du vendeur (niveau bas de la hiérarchie).
-
-      - name: state
-        description: État du vendeur (niveau haut de la hiérarchie).
-        data_tests:
-          - not_null
-
   - name: fct_orders
     description: >
       Fait commande : une ligne par commande (snapshot cumulatif achat -> livraison -> avis).
-      Relié à dim_customers et à dim_date dans trois rôles (achat, livraison estimée, livraison réelle).
+      Relié à dim_customers et à dim_date (date d'achat).
     columns:
       - name: order_id
         description: Identifiant de la commande (dimension dégénérée) ; définit le grain.
@@ -157,25 +91,7 @@ models:
                 field: customer_sk
 
       - name: purchase_date_sk
-        description: "Rôle « date d'achat » de dim_date."
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_date')
-                field: date_sk
-
-      - name: estimated_delivery_date_sk
-        description: "Rôle « date de livraison estimée » de dim_date."
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_date')
-                field: date_sk
-
-      - name: delivered_date_sk
-        description: "Rôle « date de livraison réelle » de dim_date ; ligne Unknown si non livrée."
+        description: Date d'achat dans dim_date.
         data_tests:
           - not_null
           - relationships:
@@ -220,74 +136,3 @@ models:
       - name: sentiment_label
         description: Sentiment du commentaire (positive, neutral, negative) ; null si aucun commentaire.
 
-  - name: fct_order_items
-    description: >
-      Fait article : une ligne par article de commande (grain atomique des ventes).
-      Relié à dim_products, dim_sellers, dim_customers et dim_date (rôle « date d'achat »).
-      Clé composée : order_id + order_item_number.
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns:
-              - order_id
-              - order_item_number
-    columns:
-      - name: order_id
-        description: Identifiant de la commande (dimension dégénérée).
-        data_tests:
-          - not_null
-
-      - name: order_item_number
-        description: Numéro de l'article dans la commande (dimension dégénérée).
-        data_tests:
-          - not_null
-
-      - name: product_sk
-        description: Clé du produit dans dim_products.
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_products')
-                field: product_sk
-
-      - name: seller_sk
-        description: Clé du vendeur dans dim_sellers.
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_sellers')
-                field: seller_sk
-
-      - name: customer_sk
-        description: Clé du client (personne) dans dim_customers.
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_customers')
-                field: customer_sk
-
-      - name: purchase_date_sk
-        description: "Rôle « date d'achat » de dim_date."
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_date')
-                field: date_sk
-
-      - name: price
-        description: Prix de l'article, en BRL.
-        data_tests:
-          - not_null
-          - dbt_utils.accepted_range:
-              arguments:
-                min_value: 0
-
-      - name: freight
-        description: Frais de port de l'article, en BRL.
-
-      - name: item_total
-        description: Montant total de l'article (prix + frais de port), en BRL.

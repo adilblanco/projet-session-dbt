@@ -25,12 +25,6 @@ sources:
         identifier: olist_order_items_dataset
         description: >
           Une ligne par article d'une commande, avec prix et frais de port.
-          Reliée aux commandes par order_id, aux produits par product_id et aux vendeurs par seller_id.
-
-      - name: order_payments
-        identifier: olist_order_payments_dataset
-        description: >
-          Une ligne par paiement (une commande peut avoir plusieurs paiements).
           Reliée aux commandes par order_id.
 
       - name: order_reviews
@@ -38,21 +32,3 @@ sources:
         description: >
           Avis des clients : note de 1 à 5 et commentaire libre en portugais.
           Reliée aux commandes par order_id ; une commande peut avoir plusieurs avis.
-
-      - name: products
-        identifier: olist_products_dataset
-        description: >
-          Une ligne par produit, avec sa catégorie (en portugais) et ses attributs physiques.
-          Reliée aux articles par product_id.
-
-      - name: sellers
-        identifier: olist_sellers_dataset
-        description: >
-          Une ligne par vendeur, avec sa localisation (ville, état, préfixe de code postal).
-          Reliée aux articles par seller_id.
-
-      - name: product_category_translation
-        identifier: product_category_name_translation
-        description: >
-          Traduction des noms de catégories de produits du portugais vers l'anglais.
-          Reliée aux produits par product_category_name.
