@@ -17,9 +17,6 @@ order_items as (
 
     select
         order_id,
-        count(*)            as items_count,
-        sum(price)          as items_amount,
-        sum(freight)        as freight_amount,
         sum(item_total)     as order_amount
 
     from {{ ref('stg_order_items') }}
@@ -47,10 +44,7 @@ final as (
         -- date d'achat en clair : axe temporel de la couche sémantique (MetricFlow)
         cast(orders.purchased_at as date) as purchase_date,
 
-        -- mesures : montants (BRL) ; commande sans article -> 0
-        coalesce(order_items.items_count, 0)     as items_count,
-        coalesce(order_items.items_amount, 0)    as items_amount,
-        coalesce(order_items.freight_amount, 0)  as freight_amount,
+        -- mesure : montant (BRL) ; commande sans article -> 0
         coalesce(order_items.order_amount, 0)    as order_amount,
 
         -- mesures : livraison ; null si la commande n'est pas livrée
@@ -59,7 +53,6 @@ final as (
 
         -- mesures : satisfaction ; null si la commande n'a pas d'avis
         reviews.review_score,
-        reviews.sentiment_score,
         reviews.sentiment_label
 
     from orders

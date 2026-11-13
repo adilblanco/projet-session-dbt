@@ -104,15 +104,6 @@ models:
         data_tests:
           - not_null
 
-      - name: items_count
-        description: Nombre d'articles de la commande (0 si aucun article).
-
-      - name: items_amount
-        description: Somme des prix des articles, en BRL.
-
-      - name: freight_amount
-        description: Somme des frais de port, en BRL.
-
       - name: order_amount
         description: Montant total de la commande (articles + frais de port), en BRL.
         data_tests:
@@ -129,9 +120,6 @@ models:
 
       - name: review_score
         description: Note de l'avis retenu (1 à 5) ; null si aucun avis.
-
-      - name: sentiment_score
-        description: Score de sentiment du commentaire ; null si aucun commentaire.
 
       - name: sentiment_label
         description: Sentiment du commentaire (positive, neutral, negative) ; null si aucun commentaire.
