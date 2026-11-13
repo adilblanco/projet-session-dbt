@@ -23,14 +23,11 @@ semantic_models:
     defaults:
       agg_time_dimension: purchase_date
 
-    # Clés : permettent à MetricFlow de relier les modèles sémantiques entre eux
+    # Clé primaire : une ligne par commande
     entities:
       - name: order
         type: primary
         expr: order_id
-      - name: customer
-        type: foreign
-        expr: customer_sk
 
     # Axes d'analyse
     dimensions:

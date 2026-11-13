@@ -31,12 +31,6 @@ models:
                 values: [1, 2, 3, 4, 5]
                 quote: false
 
-      - name: has_comment
-        description: Vrai si l'avis retenu contient un commentaire.
-
-      - name: answered_at
-        description: Date et heure de la réponse du client à l'avis retenu.
-
       - name: sentiment_score
         description: >
           Somme des polarités (+1 / -1) des mots du commentaire présents dans le lexique.

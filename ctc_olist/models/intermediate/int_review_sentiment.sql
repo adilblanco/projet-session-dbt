@@ -56,8 +56,6 @@ final as (
         latest_review.order_id,
         latest_review.review_id,
         latest_review.review_score,
-        latest_review.has_comment,
-        latest_review.answered_at,
 
         -- commentaire sans mot du lexique -> 0 ; pas de commentaire -> null
         case
