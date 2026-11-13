@@ -42,30 +42,19 @@ models:
           - not_null
 
       - name: date_day
-        description: Le jour.
+        description: Le jour (niveau bas de la hiérarchie).
         data_tests:
           - unique
           - not_null
 
-      - name: year
-        description: Année.
+      - name: month
+        description: Mois (1 à 12).
 
       - name: quarter
         description: Trimestre (1 à 4).
 
-      - name: month
-        description: Mois (1 à 12).
-
-      - name: year_month
-        description: Année et mois au format AAAA-MM.
-        data_tests:
-          - not_null
-
-      - name: day_name
-        description: Nom du jour de la semaine (en anglais).
-
-      - name: is_weekend
-        description: Vrai le samedi et le dimanche.
+      - name: year
+        description: Année (niveau haut de la hiérarchie).
 
   - name: fct_orders
     description: >

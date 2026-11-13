@@ -18,12 +18,9 @@ final as (
         -- même calcul de clé que dans les faits
         {{ dbt_utils.generate_surrogate_key(['cast(date_day as date)']) }} as date_sk,
         cast(date_day as date)              as date_day,
-        extract(year from date_day)         as year,
-        extract(quarter from date_day)      as quarter,
         extract(month from date_day)        as month,
-        strftime(date_day, '%Y-%m')         as year_month,
-        dayname(date_day)                   as day_name,
-        extract(isodow from date_day) >= 6  as is_weekend
+        extract(quarter from date_day)      as quarter,
+        extract(year from date_day)         as year
 
     from days
 
