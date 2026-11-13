@@ -79,7 +79,7 @@ Le sentiment calculé suit bien la note donnée par le client :
 Deux dimensions, chacune avec une clé de substitution `*_sk` :
 
 - `dim_customers` : une ligne par personne ; seule la dernière adresse est gardée (SCD type 1).
-- `dim_date` : un jour par ligne (2016 à 2018).
+- `dim_date` : un jour par ligne (2016 à 2018) ; hiérarchie jour → mois → trimestre → année.
 
 ### 9. Fait (marts)
 `fct_orders` : une ligne par commande, reliée au client et à la date d'achat.
