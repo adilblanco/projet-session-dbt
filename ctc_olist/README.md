@@ -39,14 +39,14 @@ Le script `../scripts/download_data.sh` télécharge l'archive Kaggle
 et place les CSV dans `data/raw/`. Les données ne sont pas versionnées.
 
 ### 3. Déclaration des sources
-Les 8 CSV utiles sont déclarés dans `models/staging/_sources.yml`.
+Les 4 CSV utiles sont déclarés dans `models/staging/_sources.yml` :
+commandes, clients, articles et avis.
 DuckDB les lit directement, sans les charger.
-Le fichier de géolocalisation n'est pas utilisé.
+Les autres fichiers de l'archive ne sont pas utilisés.
 
 ### 4. Nettoyage des sources (staging)
-Huit modèles `stg_*`, un par source, dans `models/staging/`.
+Quatre modèles `stg_*`, un par source, dans `models/staging/`.
 Convention de nommage : `_at` pour une date avec heure, `_date` pour un jour.
-Les colonnes mal orthographiées à la source (`lenght`) sont corrigées ici.
 
 ### 5. Installation de dbt_utils
 Déclaré dans `packages.yml`. Il ajoute des tests utiles,
@@ -76,18 +76,15 @@ Le sentiment calculé suit bien la note donnée par le client :
 | positif | 19 106 | 4,69 |
 
 ### 8. Dimensions (marts)
-Quatre dimensions, chacune avec une clé de substitution `*_sk` :
+Deux dimensions, chacune avec une clé de substitution `*_sk` :
 
 - `dim_customers` : une ligne par personne ; seule la dernière adresse est gardée (SCD type 1).
-- `dim_date` : un jour par ligne (2016 à 2018), plus une ligne « Unknown » pour les dates manquantes.
-- `dim_products` : la catégorie traduite en anglais est intégrée au produit.
-- `dim_sellers` : une ligne par vendeur.
+- `dim_date` : un jour par ligne (2016 à 2018).
 
-### 9. Faits (marts)
-- `fct_orders` : une ligne par commande. Montant, délai de livraison, retard, note et sentiment de l'avis.
-- `fct_order_items` : une ligne par article. Prix et frais de port, par produit et par vendeur.
-
-Les deux faits donnent le même chiffre d'affaires : 15 843 553 BRL.
+### 9. Fait (marts)
+`fct_orders` : une ligne par commande, reliée au client et à la date d'achat.
+Montant, délai de livraison, retard, note et sentiment de l'avis.
+Chiffre d'affaires total : 15 843 553 BRL.
 
 ### 10. Couche sémantique (MetricFlow)
 Un calendrier (`metricflow_time_spine`), un modèle sémantique sur `fct_orders`
@@ -145,5 +142,3 @@ mf query --metrics total_revenue,late_delivery_rate --group-by metric_time__year
 dbt deps
 dbt build
 ```
-
-Un avertissement est attendu : 13 produits ont une catégorie sans traduction anglaise.
