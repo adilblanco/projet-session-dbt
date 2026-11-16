@@ -142,3 +142,73 @@ mf query --metrics total_revenue,late_delivery_rate --group-by metric_time__year
 dbt deps
 dbt build
 ```
+
+
+## Exécuter sur Snowflake (optionnel)
+
+Le même projet peut tourner sur Snowflake : seule la connexion change.
+`profiles.yml` contient une deuxième cible, `snowflake` ; DuckDB reste la cible par défaut.
+
+### Authentification par paire de clés
+Un compte Snowflake créé avec Google n'a pas de mot de passe.
+dbt se connecte donc avec une paire de clés :
+la clé privée reste sur l'ordinateur, la clé publique est donnée à Snowflake.
+
+**1. Installer l'adaptateur** (dans l'environnement Python du projet) :
+
+```bash
+python -m pip install dbt-snowflake
+```
+
+**2. Générer les clés**, hors du dépôt, dans `~/.snowflake/` :
+
+```bash
+mkdir -p ~/.snowflake
+openssl genrsa 2048 | openssl pkcs8 -topk8 -nocrypt -out ~/.snowflake/rsa_key.p8
+openssl rsa -in ~/.snowflake/rsa_key.p8 -pubout -out ~/.snowflake/rsa_key.pub
+chmod 600 ~/.snowflake/rsa_key.p8
+```
+
+La clé privée (`rsa_key.p8`) ne se partage jamais et ne se commite jamais.
+
+**3. Afficher la clé publique sur une seule ligne**, sans les lignes `BEGIN` et `END` :
+
+```bash
+grep -v 'PUBLIC KEY' ~/.snowflake/rsa_key.pub | tr -d '\n'
+```
+
+**4. Lancer les requêtes dans l'éditeur SQL de Snowsight** (rôle `ACCOUNTADMIN`), dans cet ordre :
+
+```sql
+-- Créer la base qui recevra les tables du projet
+create database if not exists OLIST;
+
+-- Trouver son nom d'utilisateur, son compte et son organisation
+select current_user(), current_account_name(), current_organization_name();
+
+-- Donner la clé publique à Snowflake (coller le résultat de l'étape 3 entre les apostrophes)
+alter user "<nom>" set rsa_public_key='<clé publique>';
+
+-- Vérifier : HAS_KEYPAIR doit valoir true ; noter la valeur LOGIN_NAME
+desc user "<nom>";
+```
+
+`<nom>` est le résultat de `current_user()`.
+Les guillemets doubles sont nécessaires s'il est en minuscules (cas d'un compte créé avec Google).
+
+**5. Définir les variables de connexion** (à refaire dans chaque nouveau terminal) :
+
+```bash
+export SNOWFLAKE_ACCOUNT="<organisation>-<compte>" SNOWFLAKE_USER="<login_name>"
+```
+
+- `<organisation>-<compte>` : les résultats de `current_organization_name()` et `current_account_name()`, joints par un tiret.
+- `<login_name>` : la valeur `LOGIN_NAME` de `desc user` (pour un compte Google, l'adresse courriel), et non `NAME`.
+
+**6. Tester la connexion** :
+
+```bash
+dbt debug --target snowflake
+```
+
+Résultat attendu : `Connection test: [OK connection ok]`.
