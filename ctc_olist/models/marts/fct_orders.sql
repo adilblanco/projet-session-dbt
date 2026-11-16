@@ -48,7 +48,8 @@ final as (
         coalesce(order_items.order_amount, 0)    as order_amount,
 
         -- mesures : livraison ; null si la commande n'est pas livrée
-        date_diff('day', orders.purchased_at, orders.delivered_to_customer_at) as delivery_days,
+        -- dbt.datediff : macro multi-base (DuckDB : date_diff ; Snowflake : datediff)
+        {{ dbt.datediff('orders.purchased_at', 'orders.delivered_to_customer_at', 'day') }} as delivery_days,
         cast(orders.delivered_to_customer_at as date) > orders.estimated_delivery_date as is_late,
 
         -- mesures : satisfaction ; null si la commande n'a pas d'avis
