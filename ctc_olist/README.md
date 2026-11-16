@@ -212,3 +212,36 @@ dbt debug --target snowflake
 ```
 
 Résultat attendu : `Connection test: [OK connection ok]`.
+
+### Charger les données brutes
+Snowflake ne lit pas les CSV de `data/raw/` directement : il faut d'abord les charger.
+La macro `macros/load_raw_to_snowflake.sql` envoie les 4 CSV dans une zone de dépôt (stage),
+puis les copie dans des tables du schéma `OLIST.RAW`, toutes les colonnes en texte :
+
+```bash
+dbt run-operation load_raw_to_snowflake --target snowflake
+```
+
+`_sources.yml` pointe vers `RAW` sur Snowflake, et vers les CSV sur DuckDB.
+
+### Construire et interroger
+`DBT_TARGET` choisit la cible pour `dbt` et pour `mf` (MetricFlow n'a pas d'option `--target`) :
+
+```bash
+export DBT_TARGET=snowflake
+dbt build
+dbt parse
+mf query --metrics total_revenue
+```
+
+Pour revenir à DuckDB : `unset DBT_TARGET` puis `dbt parse`.
+
+### Ce qui diffère entre les deux bases
+Deux modèles utilisent du SQL propre à chaque base :
+
+- `fct_orders` : le délai de livraison utilise la macro multi-base `dbt.datediff`.
+- `int_review_sentiment` : le découpage des commentaires en mots a une version par base (`if target.type`).
+
+Résultat : les 62 étapes du build passent sur les deux bases, et les montants et délais sont identiques.
+Le sentiment diffère pour 4 commandes sur 99 441 : quelques caractères rares (`ª`, `º`)
+sont traités différemment par les deux bases.
