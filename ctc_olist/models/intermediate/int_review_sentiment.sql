@@ -26,14 +26,38 @@ latest_review as (
 ),
 
 -- Découpage du commentaire en mots (minuscules, sans accents)
+-- Le SQL dépend de la base : dbt choisit la version selon la cible (target.type).
 words as (
 
+    {% if target.type == 'snowflake' %}
+
+    -- Snowflake : accents retirés avec translate, tout ce qui n'est pas une lettre
+    -- devient une espace, puis split_to_table donne une ligne par mot
+    select
+        latest_review.review_id,
+        split_words.value as word
+
+    from latest_review,
+        lateral split_to_table(
+            regexp_replace(
+                translate(lower(latest_review.comment_message), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn'),
+                '[^a-z]+', ' '
+            ),
+            ' '
+        ) as split_words
+    where latest_review.has_comment
+
+    {% else %}
+
+    -- DuckDB
     select
         review_id,
         unnest(regexp_split_to_array(lower(strip_accents(comment_message)), '[^a-z]+')) as word
 
     from latest_review
     where has_comment
+
+    {% endif %}
 
 ),
 
