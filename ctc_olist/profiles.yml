@@ -6,3 +6,18 @@ ctc_olist:
       type: duckdb
       path: "ctc_olist.duckdb"
       threads: 4
+
+    # Entrepôt infonuagique Snowflake (essai de 30 jours) : dbt build --target snowflake
+    # Les identifiants viennent de variables d'environnement, jamais écrits ici.
+    snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      # Authentification par paire de clés (compte créé via Google, donc sans mot de passe).
+      # La clé privée reste hors du dépôt, dans ~/.snowflake/.
+      private_key_path: "{{ env_var('HOME') }}/.snowflake/rsa_key.p8"
+      role: ACCOUNTADMIN
+      warehouse: COMPUTE_WH
+      database: OLIST
+      schema: main
+      threads: 4
