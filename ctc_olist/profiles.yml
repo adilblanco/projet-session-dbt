@@ -1,6 +1,8 @@
-# Connexion du projet : fichier DuckDB local.
+# Connexion du projet : fichier DuckDB local par défaut, Snowflake en option.
 ctc_olist:
-  target: local
+  # Cible par défaut : local (DuckDB). Pour Snowflake, export DBT_TARGET=snowflake.
+  # mf (MetricFlow) n'a pas d'option --target : il suit aussi cette variable.
+  target: "{{ env_var('DBT_TARGET', 'local') }}"
   outputs:
     local:
       type: duckdb
