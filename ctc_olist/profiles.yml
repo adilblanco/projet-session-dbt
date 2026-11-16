@@ -21,5 +21,6 @@ ctc_olist:
       role: ACCOUNTADMIN
       warehouse: COMPUTE_WH
       database: OLIST
-      schema: main
+      # Schéma par défaut de Snowflake : Tableau l'ouvre directement
+      schema: public
       threads: 4
