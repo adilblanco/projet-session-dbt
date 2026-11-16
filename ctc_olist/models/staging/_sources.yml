@@ -3,9 +3,13 @@ version: 2
 sources:
   - name: olist
     description: Fichiers CSV bruts du jeu de données Olist Brazilian E-Commerce (Kaggle).
-    # DuckDB lit chaque CSV directement ; {identifier} = nom du fichier sans .csv
-    meta:
-      external_location: "read_csv('data/raw/{identifier}.csv', header = true)"
+    # Snowflake : tables chargées par la macro load_raw_to_snowflake, dans le schéma RAW.
+    # DuckDB : le schéma est ignoré, car external_location lit le CSV directement.
+    schema: "{{ 'raw' if target.type == 'snowflake' else 'main' }}"
+    config:
+      meta:
+        # DuckDB lit chaque CSV directement ; {identifier} = nom du fichier sans .csv
+        external_location: "read_csv('data/raw/{identifier}.csv', header = true)"
 
     tables:
       - name: orders
