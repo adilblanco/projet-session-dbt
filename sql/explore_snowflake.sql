@@ -54,7 +54,107 @@ from PUBLIC.STG_ORDER_REVIEWS;
 select count(*) as rows_after_rule
 from PUBLIC.INT_REVIEW_SENTIMENT;
 
--- 3.2 Validation du sentiment : il suit la note donnée par le client
+-- ---------------------------------------------------------------------
+-- Sentiment : du commentaire (texte libre, donnée non structurée) au score
+-- ---------------------------------------------------------------------
+
+-- 3.2 Construction du lexique (analyse analyses/sentiment_word_scores.sql, version Snowflake) :
+--     mots fréquents et note moyenne des avis qui les contiennent.
+--     polarity indique les mots d'opinion retenus dans le seed (null = mot écarté).
+with words as (
+    select
+        r.review_score,
+        w.value as word
+    from PUBLIC.STG_ORDER_REVIEWS r,
+        lateral split_to_table(
+            regexp_replace(
+                translate(lower(r.comment_message), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn'),
+                '[^a-z]+', ' '
+            ),
+            ' '
+        ) w
+    where r.comment_message is not null
+)
+select
+    words.word,
+    count(*)                          as occurrences,
+    round(avg(words.review_score), 2) as avg_review_score,
+    l.polarity
+from words
+left join PUBLIC.SENTIMENT_LEXICON l on l.word = words.word
+where length(words.word) >= 3
+group by words.word, l.polarity
+having count(*) >= 150
+order by avg_review_score;
+
+-- 3.3 Le lexique obtenu (seed sentiment_lexicon.csv) : 58 mots, +1 positif, -1 négatif
+select
+    polarity,
+    count(*)                                        as words,
+    listagg(word, ', ') within group (order by word) as word_list
+from PUBLIC.SENTIMENT_LEXICON
+group by polarity
+order by polarity desc;
+
+-- 3.4 Découpage d'un commentaire en mots (même SQL que int_review_sentiment) :
+--     minuscules, accents retirés (Ótimo -> otimo), ponctuation -> espace, un mot par ligne
+with words as (
+    select
+        w.index as position,
+        w.value as word
+    from PUBLIC.STG_ORDER_REVIEWS r,
+        lateral split_to_table(
+            regexp_replace(
+                translate(lower(r.comment_message), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn'),
+                '[^a-z]+', ' '
+            ),
+            ' '
+        ) w
+    where r.review_id = 'f623cdc5c68ef38a3690bb66eb7e2f2b'
+)
+select
+    words.position,
+    words.word,
+    l.polarity
+from words
+left join PUBLIC.SENTIMENT_LEXICON l on l.word = words.word
+where words.word <> ''
+order by words.position;
+
+-- 3.5 Score de ce commentaire : somme des polarités (+1 otimo, +1 recomendo = 2) -> positive
+select
+    r.comment_message,
+    s.review_score,
+    s.sentiment_score,
+    s.sentiment_label
+from PUBLIC.INT_REVIEW_SENTIMENT s
+join PUBLIC.STG_ORDER_REVIEWS r
+    on r.review_id = s.review_id and r.order_id = s.order_id
+where s.review_id = 'f623cdc5c68ef38a3690bb66eb7e2f2b';
+
+-- 3.6 Répartition : près de 6 commandes sur 10 n'ont pas de commentaire (sentiment null)
+select
+    coalesce(sentiment_label, '(pas de commentaire)') as sentiment_label,
+    count(*)                                          as orders
+from PUBLIC.INT_REVIEW_SENTIMENT
+group by 1
+order by orders desc;
+
+-- 3.7 Exemples de commentaires pour chaque sentiment
+select
+    s.sentiment_label,
+    s.sentiment_score,
+    s.review_score,
+    r.comment_message
+from PUBLIC.INT_REVIEW_SENTIMENT s
+join PUBLIC.STG_ORDER_REVIEWS r
+    on r.review_id = s.review_id and r.order_id = s.order_id
+where s.sentiment_label is not null
+  and length(r.comment_message) between 30 and 100
+qualify row_number() over (partition by s.sentiment_label order by s.review_id) <= 3
+order by s.sentiment_label, s.sentiment_score;
+
+-- 3.8 Validation : le sentiment suit la note donnée par le client
 select
     sentiment_label,
     count(*)                    as orders,
@@ -63,6 +163,27 @@ from PUBLIC.INT_REVIEW_SENTIMENT
 where sentiment_label is not null
 group by sentiment_label
 order by avg_review_score;
+
+-- 3.9 Même validation dans l'autre sens : part de commentaires négatifs selon la note
+select
+    review_score,
+    count(sentiment_label)                                                    as commented_orders,
+    round(count_if(sentiment_label = 'negative') / count(sentiment_label), 4) as negative_sentiment_rate
+from PUBLIC.INT_REVIEW_SENTIMENT
+group by review_score
+order by review_score;
+
+-- 3.10 Limite connue : la négation n'est pas comprise.
+--      « Ainda não testei » contient « nao » (négatif) : avis 5 étoiles classé négatif.
+select
+    r.comment_message,
+    s.review_score,
+    s.sentiment_score,
+    s.sentiment_label
+from PUBLIC.INT_REVIEW_SENTIMENT s
+join PUBLIC.STG_ORDER_REVIEWS r
+    on r.review_id = s.review_id and r.order_id = s.order_id
+where s.review_id = 'b464babf69e102ce44e5035171e81801';
 
 
 -- =====================================================================
