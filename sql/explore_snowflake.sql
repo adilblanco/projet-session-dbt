@@ -58,9 +58,91 @@ from PUBLIC.INT_REVIEW_SENTIMENT;
 -- Sentiment : du commentaire (texte libre, donnée non structurée) au score
 -- ---------------------------------------------------------------------
 
--- 3.2 Construction du lexique (analyse analyses/sentiment_word_scores.sql, version Snowflake) :
---     mots fréquents et note moyenne des avis qui les contiennent.
---     polarity indique les mots d'opinion retenus dans le seed (null = mot écarté).
+-- Construction du lexique, dans l'ordre : 3.2 et 3.3 (requêtes), choix humain (CSV),
+-- dbt seed (table), puis 3.4 et 3.5 (contrôle de la table obtenue).
+
+-- 3.2 Étape 1 (avant le lexique) : mots fréquents et note moyenne des avis qui les contiennent
+--     (analyse analyses/sentiment_word_scores.sql, version Snowflake)
+with words as (
+    select
+        r.review_score,
+        w.value as word
+    from PUBLIC.STG_ORDER_REVIEWS r,
+        lateral split_to_table(
+            regexp_replace(
+                translate(lower(r.comment_message), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn'),
+                '[^a-z]+', ' '
+            ),
+            ' '
+        ) w
+    where r.comment_message is not null
+)
+select
+    word,
+    count(*)                    as occurrences,
+    round(avg(review_score), 2) as avg_review_score
+from words
+where length(word) >= 3
+group by word
+having count(*) >= 150
+order by avg_review_score;
+
+-- 3.3 Étape 2 (avant le lexique) : mots d'opinion candidats, plus rares (moins de 150 occurrences,
+--     donc absents de la 3.2) : un mot est retenu si sa note moyenne est extrême.
+--      Exemple : vergonha (29 fois, note 1,45) retenu ; problema (671 fois, note 2,76) écarté.
+with words as (
+    select
+        r.review_score,
+        w.value as word
+    from PUBLIC.STG_ORDER_REVIEWS r,
+        lateral split_to_table(
+            regexp_replace(
+                translate(lower(r.comment_message), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn'),
+                '[^a-z]+', ' '
+            ),
+            ' '
+        ) w
+    where r.comment_message is not null
+)
+select
+    word,
+    count(*)                    as occurrences,
+    round(avg(review_score), 2) as avg_review_score
+from words
+where word in (
+    'horrivel', 'problema', 'problemas', 'decepcionado', 'decepcionada', 'decepcao', 'absurdo',
+    'reclamacao', 'lamentavel', 'insatisfeito', 'insatisfeita', 'enganosa', 'pior', 'pessimo',
+    'pessima', 'ruim', 'pessimos', 'fraco', 'fraca', 'pessimas', 'descaso', 'vergonha', 'lixo',
+    'pena', 'frustrada', 'frustrado', 'atrasou', 'atrasado', 'atrasada'
+)
+group by word
+order by avg_review_score;
+
+-- Étapes 3 et 4 (aucune requête à lancer ici) : choix des mots, puis création de la table
+--   a) Choix humain : à partir des listes 3.2 et 3.3, on garde seulement les mots d'opinion
+--      (pessimo, otimo, recomendo...) et on écarte les autres (produto, prazo, dinheiro...).
+--      Les mots retenus sont écrits dans le fichier ctc_olist/seeds/sentiment_lexicon.csv :
+--          word,polarity
+--          adorei,1
+--          ...
+--   b) La commande « dbt seed » lit ce CSV et crée la table. Elle fait l'équivalent de :
+--          create or replace table PUBLIC.SENTIMENT_LEXICON (word varchar, polarity integer);
+--          insert into PUBLIC.SENTIMENT_LEXICON (word, polarity) values
+--              ('adorei', 1), ('amei', 1), ..., ('vergonha', -1);
+--      Les types (varchar, integer) viennent de seeds/_seeds.yml (column_types).
+--      Les tests du seed vérifient : word unique et non nul, polarity = 1 ou -1.
+
+-- 3.4 Étape 5 (contrôle) : le lexique obtenu, créé par dbt seed : 58 mots, +1 positif, -1 négatif
+select
+    polarity,
+    count(*)                                        as words,
+    listagg(word, ', ') within group (order by word) as word_list
+from PUBLIC.SENTIMENT_LEXICON
+group by polarity
+order by polarity desc;
+
+-- 3.5 Étape 5 (contrôle) : la liste 3.2 avec la décision prise pour chaque mot fréquent
+--     polarity = 1 ou -1 : mot retenu ; null : mot écarté (pas d'opinion : produto, prazo, que...)
 with words as (
     select
         r.review_score,
@@ -87,16 +169,7 @@ group by words.word, l.polarity
 having count(*) >= 150
 order by avg_review_score;
 
--- 3.3 Le lexique obtenu (seed sentiment_lexicon.csv) : 58 mots, +1 positif, -1 négatif
-select
-    polarity,
-    count(*)                                        as words,
-    listagg(word, ', ') within group (order by word) as word_list
-from PUBLIC.SENTIMENT_LEXICON
-group by polarity
-order by polarity desc;
-
--- 3.4 Découpage d'un commentaire en mots (même SQL que int_review_sentiment) :
+-- 3.6 Découpage d'un commentaire en mots (même SQL que int_review_sentiment) :
 --     minuscules, accents retirés (Ótimo -> otimo), ponctuation -> espace, un mot par ligne
 with words as (
     select
@@ -121,7 +194,7 @@ left join PUBLIC.SENTIMENT_LEXICON l on l.word = words.word
 where words.word <> ''
 order by words.position;
 
--- 3.5 Score de ce commentaire : somme des polarités (+1 otimo, +1 recomendo = 2) -> positive
+-- 3.7 Score de ce commentaire : somme des polarités (+1 otimo, +1 recomendo = 2) -> positive
 select
     r.comment_message,
     s.review_score,
@@ -132,7 +205,7 @@ join PUBLIC.STG_ORDER_REVIEWS r
     on r.review_id = s.review_id and r.order_id = s.order_id
 where s.review_id = 'f623cdc5c68ef38a3690bb66eb7e2f2b';
 
--- 3.6 Répartition : près de 6 commandes sur 10 n'ont pas de commentaire (sentiment null)
+-- 3.8 Répartition : près de 6 commandes sur 10 n'ont pas de commentaire (sentiment null)
 select
     coalesce(sentiment_label, '(pas de commentaire)') as sentiment_label,
     count(*)                                          as orders
@@ -140,7 +213,7 @@ from PUBLIC.INT_REVIEW_SENTIMENT
 group by 1
 order by orders desc;
 
--- 3.7 Exemples de commentaires pour chaque sentiment
+-- 3.9 Exemples de commentaires pour chaque sentiment
 select
     s.sentiment_label,
     s.sentiment_score,
@@ -154,7 +227,7 @@ where s.sentiment_label is not null
 qualify row_number() over (partition by s.sentiment_label order by s.review_id) <= 3
 order by s.sentiment_label, s.sentiment_score;
 
--- 3.8 Validation : le sentiment suit la note donnée par le client
+-- 3.10 Validation : le sentiment suit la note donnée par le client
 select
     sentiment_label,
     count(*)                    as orders,
@@ -164,7 +237,7 @@ where sentiment_label is not null
 group by sentiment_label
 order by avg_review_score;
 
--- 3.9 Même validation dans l'autre sens : part de commentaires négatifs selon la note
+-- 3.11 Même validation dans l'autre sens : part de commentaires négatifs selon la note
 select
     review_score,
     count(sentiment_label)                                                    as commented_orders,
@@ -173,7 +246,7 @@ from PUBLIC.INT_REVIEW_SENTIMENT
 group by review_score
 order by review_score;
 
--- 3.10 Limite connue : la négation n'est pas comprise.
+-- 3.12 Limite connue : la négation n'est pas comprise.
 --      « Ainda não testei » contient « nao » (négatif) : avis 5 étoiles classé négatif.
 select
     r.comment_message,
