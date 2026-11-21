@@ -330,14 +330,14 @@ group by d.year, d.quarter
 order by d.year, d.quarter;
 
 -- 5.3 Les 10 états qui génèrent le plus de chiffre d'affaires
+--     (état de livraison, stocké dans le fait : pas de jointure)
 select
-    c.state,
+    f.delivery_state,
     count(*)                         as orders,
     sum(f.order_amount)              as total_revenue,
     round(avg(f.review_score), 2)    as average_review_score
 from PUBLIC.FCT_ORDERS f
-join PUBLIC.DIM_CUSTOMERS c on f.customer_sk = c.customer_sk
-group by c.state
+group by f.delivery_state
 order by total_revenue desc
 limit 10;
 
