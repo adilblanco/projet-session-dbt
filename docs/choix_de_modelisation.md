@@ -56,9 +56,9 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Preuve :* tests `unique` + `not_null` PASS sur les 4 clés.
 
 **`dim_customers` : une ligne par personne, SCD type 1**
-*Choix :* granularité `customer_unique_id` (et non `customer_id`, qui change à chaque commande) ; seule la dernière adresse est gardée.
-*Notion :* granularité d'une dimension ; technique d'historisation des dimensions à évolution lente, SCD type 1 (écraser l'ancienne valeur).
-*Preuve :* 99 441 `customer_id` → 96 096 personnes ; 252 ont plusieurs adresses.
+*Choix :* granularité `customer_unique_id` (et non `customer_id`, qui change à chaque commande) ; seul l'état est gardé, celui de la commande la plus récente. La ville et le code postal restent en staging : aucune analyse ne les utilise.
+*Notion :* granularité d'une dimension ; technique d'historisation des dimensions à évolution lente, SCD type 1 (écraser l'ancienne valeur) ; ne garder que les attributs utiles au sujet d'analyse.
+*Preuve :* 99 441 `customer_id` → 96 096 personnes ; 39 ont été livrées dans plusieurs états.
 
 **`dim_date` générée**
 *Choix :* un jour par ligne (2016 à 2018) ; aucune source, le calendrier est calculé. Seuls les niveaux de la hiérarchie jour → mois → trimestre → année sont gardés (`date_day`, `month`, `quarter`, `year`).
@@ -82,7 +82,7 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Notion :* dimension dégénérée (comme le No Commande).
 
 **État de livraison figé dans le fait**
-*Choix :* `delivery_state` garde dans `fct_orders` l'état de l'adresse de chaque commande, car `dim_customers` (SCD type 1) ne connaît que la dernière adresse du client.
+*Choix :* `delivery_state` garde dans `fct_orders` l'état de l'adresse de chaque commande, car `dim_customers` (SCD type 1) ne connaît que le dernier état du client.
 *Notion :* dimension dégénérée ; un attribut figé au moment de la transaction complète une dimension SCD type 1 sans passer au SCD type 2.
 *Preuve :* 43 commandes sont livrées dans un autre état que l'état actuel du client ; le taux de retard de MA passe de 17,36 % à 17,43 %.
 
@@ -118,7 +118,7 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Notion :* bien choisir le dénominateur ; une commande non livrée ne peut pas être en retard.
 
 **Le schéma en étoile reproduit dans la couche sémantique**
-*Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Seul l'état est exposé : un même nom de ville existe dans plusieurs états. Deux axes « état » coexistent : `customer__state` (où vit le client aujourd'hui) et `order__delivery_state` (où la commande a été livrée, à utiliser pour les retards).
+*Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Deux axes « état » coexistent : `customer__state` (où vit le client aujourd'hui) et `order__delivery_state` (où la commande a été livrée, à utiliser pour les retards).
 *Notion :* clé étrangère du fait vers la dimension ; la couche sémantique fait la jointure à la place de l'utilisateur, et un indicateur garde une seule définition quel que soit l'axe d'analyse.
 *Preuve :* `mf query --metrics late_delivery_rate --group-by customer__state` fonctionne sans jointure écrite à la main ; avec `order__delivery_state`, AL reste en tête (21,4 % de retard sur 413 commandes).
 

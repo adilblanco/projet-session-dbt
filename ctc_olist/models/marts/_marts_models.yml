@@ -66,7 +66,7 @@ models:
       - name: delivery_state
         description: >
           État de l'adresse de livraison au moment de la commande (dimension dégénérée).
-          Peut différer de dim_customers.state, qui ne garde que la dernière adresse du client (SCD type 1).
+          Peut différer de dim_customers.state, qui ne garde que le dernier état du client (SCD type 1).
         data_tests:
           - not_null
 

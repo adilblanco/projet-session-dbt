@@ -38,7 +38,7 @@ final as (
         orders.order_status,
 
         -- état de livraison, figé au moment de la commande
-        -- (dim_customers ne garde que la dernière adresse : SCD type 1)
+        -- (dim_customers ne garde que le dernier état : SCD type 1)
         customers.state as delivery_state,
 
         -- clés étrangères (même calcul de hash que dans les dimensions)

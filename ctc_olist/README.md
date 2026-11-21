@@ -78,7 +78,7 @@ Le sentiment calculé suit bien la note donnée par le client :
 ### 8. Dimensions (marts)
 Deux dimensions, chacune avec une clé de substitution `*_sk` :
 
-- `dim_customers` : une ligne par personne ; seule la dernière adresse est gardée (SCD type 1).
+- `dim_customers` : une ligne par personne ; seul l'état de la dernière commande est gardé (SCD type 1).
 - `dim_date` : un jour par ligne (2016 à 2018) ; hiérarchie jour → mois → trimestre → année.
 
 ### 9. Fait (marts)

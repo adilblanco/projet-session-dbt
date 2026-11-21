@@ -42,7 +42,7 @@ semantic_models:
       - name: order_status
         type: categorical
       # État de livraison de la commande (à utiliser pour les retards) ;
-      # customer__state donne l'état actuel du client (dernière adresse)
+      # customer__state donne l'état actuel du client (celui de sa dernière commande)
       - name: delivery_state
         type: categorical
       - name: sentiment_label
