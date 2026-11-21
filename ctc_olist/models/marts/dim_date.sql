@@ -4,6 +4,8 @@
 with days as (
 
     -- un jour par ligne ; la date de fin est exclue
+    -- bornes fixes : les achats vont de 2016-09 à 2018-10 (jeu de données figé) ;
+    -- si une date sortait du calendrier, le test relationships de fct_orders échouerait
     {{ dbt_utils.date_spine(
         datepart="day",
         start_date="cast('2016-01-01' as date)",
