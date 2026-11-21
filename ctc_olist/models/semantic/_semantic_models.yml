@@ -89,7 +89,7 @@ semantic_models:
         type: primary
         expr: customer_sk
 
-    # Axe d'analyse : l'état (la ville n'est pas exposée : un même nom existe dans plusieurs états)
+    # Axe d'analyse : l'état actuel du client
     dimensions:
       - name: state
         type: categorical

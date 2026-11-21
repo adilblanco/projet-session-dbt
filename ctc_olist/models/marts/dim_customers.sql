@@ -1,5 +1,5 @@
 -- Dimension client : une ligne par personne (customer_unique_id).
--- SCD type 1 : on garde la dernière adresse connue (celle de la commande la plus récente).
+-- SCD type 1 : on garde le dernier état connu (celui de la commande la plus récente).
 
 with customers as (
 
@@ -13,13 +13,11 @@ orders as (
 
 ),
 
--- Adresse de chaque commande, la plus récente en premier
-latest_address as (
+-- État de chaque commande, la plus récente en premier
+latest_state as (
 
     select
         customers.customer_unique_id,
-        customers.zip_code_prefix,
-        customers.city,
         customers.state
 
     from customers
@@ -40,12 +38,10 @@ final as (
         -- clé naturelle
         customer_unique_id,
 
-        -- hiérarchie géographique : ville -> état
-        zip_code_prefix,
-        city,
+        -- attribut : état (province) du client
         state
 
-    from latest_address
+    from latest_state
 
 )
 
