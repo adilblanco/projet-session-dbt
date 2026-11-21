@@ -112,6 +112,11 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Choix :* `late_delivery_rate` = commandes en retard ÷ commandes livrées (et non ÷ toutes les commandes).
 *Notion :* bien choisir le dénominateur ; une commande non livrée ne peut pas être en retard.
 
+**Le schéma en étoile reproduit dans la couche sémantique**
+*Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Seul l'état est exposé : un même nom de ville existe dans plusieurs états.
+*Notion :* clé étrangère du fait vers la dimension ; la couche sémantique fait la jointure à la place de l'utilisateur, et un indicateur garde une seule définition quel que soit l'axe d'analyse.
+*Preuve :* `mf query --metrics late_delivery_rate --group-by customer__state` donne le même taux que le calcul SQL du notebook 03 (AL en tête : 21,4 % de retard sur 412 commandes).
+
 **Calendrier réutilisé**
 *Choix :* `metricflow_time_spine` reprend `dim_date`.
 *Notion :* ne pas dupliquer la logique ; une seule définition du calendrier.

@@ -24,10 +24,14 @@ semantic_models:
       agg_time_dimension: purchase_date
 
     # Clé primaire : une ligne par commande
+    # Clé étrangère : le client, qui relie ce modèle à customers (dim_customers)
     entities:
       - name: order
         type: primary
         expr: order_id
+      - name: customer
+        type: foreign
+        expr: customer_sk
 
     # Axes d'analyse
     dimensions:
@@ -69,6 +73,22 @@ semantic_models:
         description: Nombre de commandes au commentaire négatif.
         agg: sum
         expr: case when sentiment_label = 'negative' then 1 else 0 end
+
+  - name: customers
+    description: Clients (dim_customers) exposés à MetricFlow ; une ligne par personne.
+    model: ref('dim_customers')
+
+    # Clé primaire : même nom d'entité (customer) que la clé étrangère de orders
+    # -> MetricFlow sait joindre les deux modèles
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_sk
+
+    # Axe d'analyse : l'état (la ville n'est pas exposée : un même nom existe dans plusieurs états)
+    dimensions:
+      - name: state
+        type: categorical
 
 # Métriques : définies une seule fois, interrogeables avec `mf query`
 # Une métrique « ratio » se calcule à partir d'autres métriques : on définit d'abord les comptes simples.
