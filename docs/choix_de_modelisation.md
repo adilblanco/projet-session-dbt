@@ -81,6 +81,11 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Choix :* `order_id` et `order_status` restent dans le fait, sans dimension propre.
 *Notion :* dimension dégénérée (comme le No Commande).
 
+**État de livraison figé dans le fait**
+*Choix :* `delivery_state` garde dans `fct_orders` l'état de l'adresse de chaque commande, car `dim_customers` (SCD type 1) ne connaît que la dernière adresse du client.
+*Notion :* dimension dégénérée ; un attribut figé au moment de la transaction complète une dimension SCD type 1 sans passer au SCD type 2.
+*Preuve :* 43 commandes sont livrées dans un autre état que l'état actuel du client ; le taux de retard de MA passe de 17,36 % à 17,43 %.
+
 **Agréger les articles avant la jointure**
 *Choix :* les articles sont additionnés par commande avant d'être joints.
 *Notion :* respect de la granularité ; éviter la duplication des lignes.
@@ -113,9 +118,9 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Notion :* bien choisir le dénominateur ; une commande non livrée ne peut pas être en retard.
 
 **Le schéma en étoile reproduit dans la couche sémantique**
-*Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Seul l'état est exposé : un même nom de ville existe dans plusieurs états.
+*Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Seul l'état est exposé : un même nom de ville existe dans plusieurs états. Deux axes « état » coexistent : `customer__state` (où vit le client aujourd'hui) et `order__delivery_state` (où la commande a été livrée, à utiliser pour les retards).
 *Notion :* clé étrangère du fait vers la dimension ; la couche sémantique fait la jointure à la place de l'utilisateur, et un indicateur garde une seule définition quel que soit l'axe d'analyse.
-*Preuve :* `mf query --metrics late_delivery_rate --group-by customer__state` donne le même taux que le calcul SQL du notebook 03 (AL en tête : 21,4 % de retard sur 412 commandes).
+*Preuve :* `mf query --metrics late_delivery_rate --group-by customer__state` fonctionne sans jointure écrite à la main ; avec `order__delivery_state`, AL reste en tête (21,4 % de retard sur 413 commandes).
 
 **Calendrier réutilisé**
 *Choix :* `metricflow_time_spine` reprend `dim_date`.
