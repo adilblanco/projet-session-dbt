@@ -53,7 +53,7 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 **Clés de substitution `*_sk`**
 *Choix :* hash de la clé naturelle (clé « business ») avec `dbt_utils.generate_surrogate_key`.
 *Notion :* clé de substitution (surrogate key), indépendante de la source ; stable d'une exécution à l'autre.
-*Preuve :* tests `unique` + `not_null` PASS sur les 4 clés.
+*Preuve :* tests `unique` + `not_null` PASS sur les 2 clés (`customer_sk`, `date_sk`).
 
 **`dim_customers` : une ligne par personne, SCD type 1**
 *Choix :* granularité `customer_unique_id` (et non `customer_id`, qui change à chaque commande) ; seul l'état est gardé, celui de la commande la plus récente. La ville et le code postal restent en staging : aucune analyse ne les utilise.
