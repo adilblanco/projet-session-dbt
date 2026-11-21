@@ -135,6 +135,13 @@ Exemple :
 mf query --metrics total_revenue,late_delivery_rate --group-by metric_time__year
 ```
 
+Les métriques se regroupent aussi par état du client (`customer__state`) :
+MetricFlow fait lui-même la jointure entre `fct_orders` et `dim_customers`.
+
+```bash
+mf query --metrics late_delivery_rate --group-by customer__state --order -late_delivery_rate
+```
+
 **Premier lancement** :
 
 ```bash
