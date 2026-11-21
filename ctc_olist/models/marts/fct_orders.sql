@@ -33,9 +33,13 @@ reviews as (
 final as (
 
     select
-        -- dimension dégénérée
+        -- dimensions dégénérées
         orders.order_id,
         orders.order_status,
+
+        -- état de livraison, figé au moment de la commande
+        -- (dim_customers ne garde que la dernière adresse : SCD type 1)
+        customers.state as delivery_state,
 
         -- clés étrangères (même calcul de hash que dans les dimensions)
         {{ dbt_utils.generate_surrogate_key(['customers.customer_unique_id']) }}            as customer_sk,

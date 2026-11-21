@@ -70,6 +70,13 @@ models:
       - name: order_status
         description: Statut de la commande (dimension dégénérée).
 
+      - name: delivery_state
+        description: >
+          État de l'adresse de livraison au moment de la commande (dimension dégénérée).
+          Peut différer de dim_customers.state, qui ne garde que la dernière adresse du client (SCD type 1).
+        data_tests:
+          - not_null
+
       - name: customer_sk
         description: Clé du client (personne) dans dim_customers.
         data_tests:
