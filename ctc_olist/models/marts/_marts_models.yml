@@ -42,12 +42,30 @@ models:
 
       - name: month
         description: Mois (1 à 12).
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 12
 
       - name: quarter
         description: Trimestre (1 à 4).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+                quote: false
 
       - name: year
         description: Année (niveau haut de la hiérarchie).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2016, 2017, 2018]
+                quote: false
 
   - name: fct_orders
     description: >
