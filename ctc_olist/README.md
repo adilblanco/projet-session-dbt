@@ -251,6 +251,6 @@ Deux modèles utilisent du SQL propre à chaque base :
 - `fct_orders` : le délai de livraison utilise la macro multi-base `dbt.datediff`.
 - `int_review_sentiment` : le découpage des commentaires en mots a une version par base (`if target.type`).
 
-Résultat : les 62 étapes du build passent sur les deux bases, et les montants et délais sont identiques.
+Résultat : toutes les étapes du build passent sur les deux bases, et les montants et délais sont identiques.
 Le sentiment diffère pour 4 commandes sur 99 441 : quelques caractères rares (`ª`, `º`)
 sont traités différemment par les deux bases.
