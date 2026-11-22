@@ -128,7 +128,7 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 **Le schéma en étoile reproduit dans la couche sémantique**
 *Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Deux axes « état » coexistent : `customer__state` (où vit le client aujourd'hui) et `order__delivery_state` (où la commande a été livrée, à utiliser pour les retards).
 *Notion :* clé étrangère du fait vers la dimension ; la couche sémantique fait la jointure à la place de l'utilisateur, et un indicateur garde une seule définition quel que soit l'axe d'analyse.
-*Preuve :* `mf query --metrics late_delivery_rate --group-by customer__state` fonctionne sans jointure écrite à la main ; avec `order__delivery_state`, AL reste en tête (21,4 % de retard sur 413 commandes).
+*Preuve :* `mf query --metrics late_delivery_rate --group-by customer__state` fonctionne sans jointure écrite à la main ; avec `order__delivery_state`, AL reste en tête (21,4 % de retard sur 397 commandes livrées, 413 commandes au total).
 
 **Calendrier réutilisé**
 *Choix :* `metricflow_time_spine` reprend `dim_date`.
