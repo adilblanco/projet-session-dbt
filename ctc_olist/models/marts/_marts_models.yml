@@ -70,7 +70,7 @@ models:
   - name: fct_orders
     description: >
       Fait commande : une ligne par commande (table de situation : suit la commande de l'achat à l'avis).
-      Relié à dim_customers et à dim_date (date d'achat).
+      Relié à dim_customers et à dim_date (dates d'achat, de livraison et de livraison estimée).
     data_tests:
       # une ligne par commande : autant de lignes que dans stg_orders
       - dbt_utils.equal_rowcount:
@@ -108,6 +108,23 @@ models:
 
       - name: purchase_date_sk
         description: Date d'achat dans dim_date.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_sk
+
+      - name: delivered_date_sk
+        description: Date de livraison au client dans dim_date ; null si non livrée.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_sk
+
+      - name: estimated_delivery_date_sk
+        description: Date de livraison estimée dans dim_date.
         data_tests:
           - not_null
           - relationships:

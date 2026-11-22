@@ -63,7 +63,7 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 **`dim_date` générée**
 *Choix :* un jour par ligne (2016 à 2018) ; aucune source, le calendrier est calculé. Seuls les niveaux de la hiérarchie jour → mois → trimestre → année sont gardés (`date_day`, `month`, `quarter`, `year`).
 *Notion :* dimension date ; hiérarchie d'une dimension ; les clés de substitution permettent de « créer des enregistrements n'existant pas dans les systèmes sources ».
-*Preuve :* 1 096 jours ; chaque commande trouve son jour d'achat (test `relationships` PASS).
+*Preuve :* 1 096 jours ; chaque commande trouve son jour d'achat, de livraison et de livraison estimée (tests `relationships` PASS).
 
 
 ## Faits (datamart)
@@ -73,9 +73,9 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Notion :* étape 1 du cours (définir le sujet d'analyse) ; ne modéliser que les axes utiles.
 
 **`fct_orders` : une ligne par commande**
-*Choix :* une ligne suit la commande de l'achat à l'avis.
-*Notion :* granularité d'un fait ; table de situation (snapshot) décrivant l'ensemble du processus.
-*Preuve :* 99 441 lignes = 99 441 commandes ; test `unique` sur `order_id` PASS.
+*Choix :* une ligne suit la commande de l'achat à l'avis. Trois clés vers `dim_date` marquent les étapes : achat (`purchase_date_sk`), livraison (`delivered_date_sk`, nulle si non livrée) et livraison estimée (`estimated_delivery_date_sk`).
+*Notion :* granularité d'un fait ; table de situation (snapshot) décrivant l'ensemble du processus ; une même dimension date joue plusieurs rôles.
+*Preuve :* 99 441 lignes = 99 441 commandes ; test `unique` sur `order_id` PASS ; 96 476 commandes ont une date de livraison ; les 3 tests `relationships` vers `dim_date` PASS.
 
 **Dimension dégénérée**
 *Choix :* `order_id`, `order_status` et `sentiment_label` restent dans le fait, sans dimension propre.

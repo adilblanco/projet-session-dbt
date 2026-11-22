@@ -82,7 +82,7 @@ Deux dimensions, chacune avec une clé de substitution `*_sk` :
 - `dim_date` : un jour par ligne (2016 à 2018) ; hiérarchie jour → mois → trimestre → année.
 
 ### 9. Fait (marts)
-`fct_orders` : une ligne par commande, reliée au client et à la date d'achat.
+`fct_orders` : une ligne par commande, reliée au client et à trois dates (achat, livraison, livraison estimée).
 Faits : montant, délai de livraison, retard, note.
 Statut et sentiment : dimensions dégénérées (axes d'analyse).
 Chiffre d'affaires total : 15 843 553 BRL.
