@@ -120,6 +120,11 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Choix :* `late_delivery_rate` = commandes en retard ÷ commandes livrées (et non ÷ toutes les commandes).
 *Notion :* bien choisir le dénominateur ; une commande non livrée ne peut pas être en retard.
 
+**Le taux de retard daté par la livraison**
+*Choix :* les mesures de retard (`delivered_order_count`, `late_order_count`) utilisent `delivered_date` comme date de référence (`agg_time_dimension`) ; les autres mesures restent sur la date d'achat.
+*Notion :* dimension date à rôles multiples : la même date sert à l'achat et à la livraison ; un retard se constate le jour de la livraison.
+*Preuve :* par année de livraison, le taux de retard est de 4,3 % en 2017 et 8,6 % en 2018 ; par année d'achat (`order__purchase_date__year`), il est de 5,6 % et 7,7 %.
+
 **Le schéma en étoile reproduit dans la couche sémantique**
 *Choix :* le fait (`orders`) déclare le client comme clé étrangère (entité `customer`, `foreign`) ; la dimension (`customers`, sur `dim_customers`) le déclare comme clé primaire. Deux axes « état » coexistent : `customer__state` (où vit le client aujourd'hui) et `order__delivery_state` (où la commande a été livrée, à utiliser pour les retards).
 *Notion :* clé étrangère du fait vers la dimension ; la couche sémantique fait la jointure à la place de l'utilisateur, et un indicateur garde une seule définition quel que soit l'axe d'analyse.

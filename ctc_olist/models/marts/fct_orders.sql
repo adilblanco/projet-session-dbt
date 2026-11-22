@@ -55,6 +55,8 @@ final as (
 
         -- date d'achat en clair : axe temporel de la couche sémantique (MetricFlow)
         cast(orders.purchased_at as date) as purchase_date,
+        -- date de livraison en clair : axe temporel des mesures de retard ; null si non livrée
+        cast(orders.delivered_to_customer_at as date) as delivered_date,
 
         -- mesure : montant (BRL) ; commande sans article -> 0
         coalesce(order_items.order_amount, 0)    as order_amount,

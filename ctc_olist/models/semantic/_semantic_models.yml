@@ -39,6 +39,11 @@ semantic_models:
         type: time
         type_params:
           time_granularity: day
+      # Date de livraison : second rôle de la date, utilisé par les mesures de retard
+      - name: delivered_date
+        type: time
+        type_params:
+          time_granularity: day
       - name: order_status
         type: categorical
       # État de livraison de la commande (à utiliser pour les retards) ;
@@ -61,8 +66,11 @@ semantic_models:
         description: Nombre de commandes livrées.
         agg: count
         expr: delivery_days
+        # metric_time = date de livraison (et non date d'achat)
+        agg_time_dimension: delivered_date
       - name: late_order_count
         description: Nombre de commandes livrées en retard.
+        agg_time_dimension: delivered_date
         agg: sum
         expr: case when is_late then 1 else 0 end
       - name: review_score_avg

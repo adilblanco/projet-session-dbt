@@ -137,6 +137,9 @@ models:
         data_tests:
           - not_null
 
+      - name: delivered_date
+        description: Date de livraison en clair ; axe temporel des mesures de retard ; null si non livrée.
+
       - name: order_amount
         description: Montant total de la commande (articles + frais de port), en BRL.
         data_tests:
