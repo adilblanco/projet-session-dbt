@@ -24,7 +24,8 @@ latest_state as (
     inner join orders on customers.customer_id = orders.customer_id
     qualify row_number() over (
         partition by customers.customer_unique_id
-        order by orders.purchased_at desc
+        -- order_id départage deux commandes passées à la même date et heure
+        order by orders.purchased_at desc, orders.order_id
     ) = 1
 
 ),
