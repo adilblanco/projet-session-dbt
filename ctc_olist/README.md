@@ -61,7 +61,8 @@ On le transforme donc en score de sentiment
 Les mots ont été choisis à partir de l'analyse `analyses/sentiment_word_scores.sql`,
 qui donne la note moyenne des avis contenant chaque mot fréquent.
 Seuls les mots d'opinion ont été gardés.
-Limite connue : la négation n'est pas comprise (« não é ruim » compte comme négatif).
+Limite connue : la négation n'est pas comprise (« não é ruim » vaut −2, car « nao » compte −1).
+« nao » est gardé : sans lui, les avis 1 étoile classés positifs passeraient de 2,3 % à 7,0 %.
 
 ### 7. Sentiment par commande (intermediate)
 `int_review_sentiment` garde l'avis le plus récent de chaque commande

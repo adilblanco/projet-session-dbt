@@ -45,7 +45,8 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Choix :* 58 mots d'opinion (+1 / −1), choisis à partir de la note moyenne des avis qui les contiennent.
 *Notion :* données non structurées (la Variété des 3V) : le texte brut est structuré à l'usage, comme dans un lac de données.
 *Preuve :* note moyenne de 1,82 (négatif), 3,55 (neutre), 4,69 (positif).
-*Limite :* la négation n'est pas comprise (« não é ruim » compte comme négatif).
+*Limite :* la négation n'est pas comprise : « nao » compte −1, donc « não é ruim » vaut −2 au lieu d'être neutre ou positif.
+*Pourquoi garder « nao » :* il est dans 23 % des commentaires, et la note moyenne de ces avis est de 2,05 (4,16 sans « nao »). Le retirer ferait passer les avis 5 étoiles classés négatifs de 2,7 % à 0,7 %, mais les avis 1 étoile classés positifs de 2,3 % à 7,0 %, et 3 915 avis 1 étoile perdraient le label négatif. Au total, le sentiment suivrait moins bien la note (corrélation de 0,70 à 0,59).
 
 
 ## Dimensions (datamart)
