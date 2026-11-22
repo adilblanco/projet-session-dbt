@@ -11,7 +11,7 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 | 1. Définir les processus d'affaire ou les sujets d'analyse | la commande en ligne et la satisfaction du client |
 | 2. Déterminer la granularité | une commande (`fct_orders`) |
 | 3. Identifier les axes d'analyse (les dimensions) | client, date d'achat |
-| 4. Définir les métriques ou les faits | montant, délai de livraison, retard, note, sentiment |
+| 4. Définir les métriques ou les faits | montant, délai de livraison, retard, note |
 
 > **Attention au mot « métrique ».** Dans le cours, une métrique est un **fait** (une colonne stockée dans une table de faits).
 > Dans dbt, une « métrique » est un **calcul de la couche sémantique** (MetricFlow).
@@ -78,8 +78,8 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Preuve :* 99 441 lignes = 99 441 commandes ; test `unique` sur `order_id` PASS.
 
 **Dimension dégénérée**
-*Choix :* `order_id` et `order_status` restent dans le fait, sans dimension propre.
-*Notion :* dimension dégénérée (comme le No Commande).
+*Choix :* `order_id`, `order_status` et `sentiment_label` restent dans le fait, sans dimension propre.
+*Notion :* dimension dégénérée (comme le No Commande) ; un texte sert d'axe d'analyse ou de filtre, ce n'est pas un fait.
 
 **État de livraison figé dans le fait**
 *Choix :* `delivery_state` garde dans `fct_orders` l'état de l'adresse de chaque commande, car `dim_customers` (SCD type 1) ne connaît que le dernier état du client.
@@ -91,8 +91,9 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 *Notion :* respect de la granularité ; éviter la duplication des lignes.
 
 **Seulement les faits utiles aux KPI du BSC**
-*Choix :* cinq faits, chacun alimente un indicateur : `order_amount` (chiffre d'affaires, panier moyen), `delivery_days` et `is_late` (taux de retard), `review_score` (note moyenne), `sentiment_label` (taux de commentaires négatifs). Le détail des montants, le nombre d'articles et le score de sentiment brut sont retirés ; le score reste calculé dans `int_review_sentiment`.
+*Choix :* quatre faits, chacun alimente un indicateur : `order_amount` (chiffre d'affaires, panier moyen), `delivery_days` et `is_late` (taux de retard), `review_score` (note moyenne). Le taux de commentaires négatifs compte les commandes selon `sentiment_label` (dimension dégénérée). Le détail des montants, le nombre d'articles et le score de sentiment brut sont retirés ; le score reste calculé dans `int_review_sentiment`.
 *Notion :* étape 4 du cours (définir les métriques ou les faits) ; un fait se justifie par l'analyse qu'il permet.
+*Additivité :* `order_amount` est additif ; `is_late` est additif compté en 0/1, mais le taux de retard ne l'est pas ; `delivery_days` et `review_score` sont non additifs (on fait la moyenne).
 *Preuve :* 6,8 % des commandes livrées sont en retard ; chiffre d'affaires de 15,8 M BRL.
 
 **Chiffre d'affaires calculé à partir des articles, pas des paiements**

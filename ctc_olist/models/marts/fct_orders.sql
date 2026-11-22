@@ -56,8 +56,10 @@ final as (
         {{ dbt.datediff('orders.purchased_at', 'orders.delivered_to_customer_at', 'day') }} as delivery_days,
         cast(orders.delivered_to_customer_at as date) > orders.estimated_delivery_date as is_late,
 
-        -- mesures : satisfaction ; null si la commande n'a pas d'avis
+        -- mesure : satisfaction ; null si la commande n'a pas d'avis
         reviews.review_score,
+
+        -- dimension dégénérée : sentiment du commentaire ; null si aucun commentaire
         reviews.sentiment_label
 
     from orders

@@ -83,7 +83,8 @@ Deux dimensions, chacune avec une clé de substitution `*_sk` :
 
 ### 9. Fait (marts)
 `fct_orders` : une ligne par commande, reliée au client et à la date d'achat.
-Montant, délai de livraison, retard, note et sentiment de l'avis.
+Faits : montant, délai de livraison, retard, note.
+Statut et sentiment : dimensions dégénérées (axes d'analyse).
 Chiffre d'affaires total : 15 843 553 BRL.
 
 ### 10. Couche sémantique (MetricFlow)

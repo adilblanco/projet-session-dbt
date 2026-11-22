@@ -138,5 +138,5 @@ models:
         description: Note de l'avis retenu (1 à 5) ; null si aucun avis.
 
       - name: sentiment_label
-        description: Sentiment du commentaire (positive, neutral, negative) ; null si aucun commentaire.
+        description: Sentiment du commentaire (dimension dégénérée) ; positive, neutral ou negative ; null si aucun commentaire.
 
