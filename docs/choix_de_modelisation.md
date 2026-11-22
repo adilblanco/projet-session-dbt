@@ -99,7 +99,8 @@ Les termes sont ceux des notes de cours ; le terme technique est parfois ajouté
 **Chiffre d'affaires calculé à partir des articles, pas des paiements**
 *Choix :* chiffre d'affaires = prix des articles + frais de port. Les paiements ne sont pas utilisés.
 *Notion :* définir clairement un fait ; une seule définition du chiffre d'affaires.
-*Preuve :* articles : 15,84 M BRL ; paiements : 16,01 M BRL. L'écart vient surtout de 775 commandes payées mais sans article (indisponibles ou annulées, 162 592 BRL). Pour les commandes qui ont des articles, les deux totaux ne diffèrent que de 2 870 BRL.
+*Preuve :* articles : 15,84 M BRL ; paiements : 16,01 M BRL. L'écart vient surtout de 775 commandes payées mais sans article (surtout indisponibles ou annulées, 162 592 BRL). Pour les commandes qui ont des articles, les deux totaux ne diffèrent que de 2 870 BRL.
+*Limite :* les commandes annulées ou indisponibles restent comptées ; les exclure ne change le chiffre d'affaires que de 0,68 % et le panier moyen que de 0,57 %.
 
 **Livraison définie par la date, pas par le statut**
 *Choix :* une commande est livrée si elle a une date de livraison au client.
