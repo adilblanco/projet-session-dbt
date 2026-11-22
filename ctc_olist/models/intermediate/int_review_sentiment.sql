@@ -34,7 +34,7 @@ words as (
     -- Snowflake : accents retirés avec translate, tout ce qui n'est pas une lettre
     -- devient une espace, puis split_to_table donne une ligne par mot
     select
-        latest_review.review_id,
+        latest_review.order_id,
         split_words.value as word
 
     from latest_review,
@@ -51,7 +51,7 @@ words as (
 
     -- DuckDB
     select
-        review_id,
+        order_id,
         unnest(regexp_split_to_array(lower(strip_accents(comment_message)), '[^a-z]+')) as word
 
     from latest_review
@@ -65,12 +65,12 @@ words as (
 scores as (
 
     select
-        words.review_id,
+        words.order_id,
         sum(lexicon.polarity) as sentiment_score
 
     from words
     inner join lexicon on words.word = lexicon.word
-    group by words.review_id
+    group by words.order_id
 
 ),
 
@@ -94,7 +94,8 @@ final as (
         end as sentiment_label
 
     from latest_review
-    left join scores on latest_review.review_id = scores.review_id
+    -- jointure sur order_id : un même review_id peut couvrir plusieurs commandes
+    left join scores on latest_review.order_id = scores.order_id
 
 )
 
