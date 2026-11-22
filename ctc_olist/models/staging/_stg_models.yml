@@ -18,6 +18,11 @@ models:
           utiliser customer_unique_id (stg_customers) pour identifier la personne.
         data_tests:
           - not_null
+          # chaque commande a un client (sinon l'inner join de fct_orders perdrait des lignes)
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
 
       - name: order_status
         description: Statut de la commande (livrée, expédiée, annulée…).

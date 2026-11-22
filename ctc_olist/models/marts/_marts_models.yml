@@ -71,6 +71,15 @@ models:
     description: >
       Fait commande : une ligne par commande (table de situation : suit la commande de l'achat à l'avis).
       Relié à dim_customers et à dim_date (date d'achat).
+    data_tests:
+      # une ligne par commande : autant de lignes que dans stg_orders
+      - dbt_utils.equal_rowcount:
+          arguments:
+            compare_model: ref('stg_orders')
+      # une commande livrée a toujours un indicateur de retard
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "delivery_days is null or is_late is not null"
     columns:
       - name: order_id
         description: Identifiant de la commande (dimension dégénérée) ; définit le grain.
